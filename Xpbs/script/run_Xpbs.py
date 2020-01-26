@@ -85,10 +85,6 @@ from Xpbs import __version__
     "--gpu/--no-gpu", default=False, show_default=True,
     help="Switch from Torque to Slurm (including querying 1 gpu)"
 )
-@click.option(
-    "-v", "--verbose", required=False, is_flag=True,
-    default=False, help="Show process.", show_default=True
-)
 @click.version_option(__version__, prog_name="Xpbs")
 
 
@@ -110,7 +106,6 @@ def run_Xpbs(
         loc,
         noq,
         gpu,
-        verbose
 ):
     Xpbs(
         i_script,
@@ -130,7 +125,6 @@ def run_Xpbs(
         loc,
         noq,
         gpu,
-        verbose
     )
 
 

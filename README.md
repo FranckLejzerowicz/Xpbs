@@ -78,7 +78,6 @@ Options:
   --noq / --no-noq                Do not ask sanity check  [default: False]
   --gpu / --no-gpu                Switch from Torque to Slurm (including
                                   querying 1 gpu)  [default: False]
-  -v, --verbose                   Show process.  [default: False]
   --version                       Show the version and exit.
   --help                          Show this message and exit. 
 ```
@@ -86,4 +85,4 @@ Options:
 
 Bug Reports:
 -----------
-contact ``flejzerowicz@health.ucsd.edu``
+contact `flejzerowicz@health.ucsd.edu`

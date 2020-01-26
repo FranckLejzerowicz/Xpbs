@@ -14,7 +14,7 @@ def get_env(
         o_pbs,
         p_env,
         p_tmp,
-        p_dir,
+        work_dir,
         gpu,
         loc,
         ff_paths
@@ -55,8 +55,8 @@ def get_env(
     # if running on /localscratch
     if loc:
         # get the output directory for the job
-        if exists(p_dir) and p_dir != '.':
-            locdir = '/localscratch/%s_${%s}/%s' % (i_job, job_id, p_dir.strip('/'))
+        if exists(work_dir) and work_dir != '.':
+            locdir = '/localscratch/%s_${%s}/%s' % (i_job, job_id, work_dir.strip('/'))
         else:
             locdir = '/localscratch/%s_${%s}' % (i_job, job_id)
         env.append('locdir=%s' % locdir)

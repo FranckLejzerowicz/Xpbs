@@ -42,64 +42,38 @@ def Xpbs(
 		run,
 		loc,
 		noq,
-		gpu,
-		verbose
+		gpu
 ):
-	print(i_script)
-	print(o_pbs)
-	print(i_job)
-	print(p_queue)
-	print(p_env)
-	print(p_dir)
-	print(p_nodes)
-	print(p_tmp)
-	print(p_procs)
-	print(p_time)
-	print(p_mem)
-	print(p_nodes_names)
-	print(email)
-	print(run)
-	print(loc)
-	print(noq)
-	print(gpu)
-	print(verbose)
 
-	email_address = get_email_address(dirname(abspath( __file__ )))
-	print(email_address)
+	# get address from config file (which must exist)
+	email_address = get_email_address(dirname(abspath(__file__)))
 
-	job_file = get_job_file(
-		o_pbs, i_job, gpu
-	)
-	print(job_file)
+	# get the
+	job_file = get_job_file(o_pbs, i_job, gpu)
 
-	workdir = get_work_dir(p_dir)
-	print(workdir)
+	# get the absolute path of the working directory
+	work_dir = get_work_dir(p_dir)
 
 	# ff is not empty only if the --loc is active
 	# (i.e. if user wishes that the job happens on /localscratch file copies)
-	commands, ff_paths, ff_dirs = parse_command(
-		i_script, loc
-	)
-	print(commands)
-	print(ff_paths)
-	print(ff_dirs)
+	commands, ff_paths, ff_dirs = parse_command(i_script, loc)
 
 	# pbs directives
 	pbs = get_pbs(
-		gpu,
+		i_job,
+		o_pbs,
 		p_time,
 		p_queue,
-		i_job,
-		email,
-		email_address,
-		o_pbs,
 		p_nodes,
 		p_procs,
 		p_nodes_names,
 		p_mem,
+		gpu,
+		email,
+		email_address
 	)
-	print(pbs)
 
+	# print-based, visual checks
 	if not noq:
 		check_pbs(pbs)
 		check_command(job_file, commands)
@@ -110,7 +84,7 @@ def Xpbs(
 		o_pbs,
 		p_env,
 		p_tmp,
-		p_dir,
+		work_dir,
 		gpu,
 		loc,
 		ff_paths

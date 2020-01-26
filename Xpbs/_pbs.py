@@ -42,17 +42,17 @@ def get_nodes_ppn(n_, p):
 
 
 def get_pbs(
-        gpu,
+        i_job,
+        o_pbs,
         p_time,
         p_queue,
-        i_job,
-        email,
-        email_address,
-        o_pbs,
         p_nodes,
         p_procs,
         p_nodes_names,
         p_mem,
+        gpu,
+        email,
+        email_address
 ):
     pbs = ['#!/bin/bash']
     if gpu:
