@@ -15,57 +15,58 @@ from Xpbs import __version__
 @click.command()
 @click.option(
     "-i", "--i-script", required=True, multiple=True,
-    help="Command line or script of command lines"
+    help="Script of command lines to transform to Torque/Slurm job"
+         "(Command line without '-' also works (e.g. 'tar cpfz file.tar.gz folder/*'))"
 )
 @click.option(
-    "-o", "--o-pbs", required=False, default=None,
-    help="PBS job file name (default = Job_name.sh)"
+    "-o", "--o-pbs", required=False, default=None, type=str,
+    help="Output job file name (default to <input>_TIMESTAMP.pbs)"
 )
 @click.option(
-    "-j", "--i-job", required=True, help="Job name"
+    "-j", "--i-job", required=True, type=str, help="Job name"
 )
 @click.option(
     "-q", "--p-queue", required=False, default=None,
-    type=click.Choice(['short4gb', 'med4gb', 'med8gb', 'long8gb', 'longmem', 'highmem', None]),
+    type=click.Choice(['short4gb','med4gb','med8gb','long8gb','longmem','highmem']),
     help="Queue name"
 )
 @click.option(
-    "-e", "--p-env", required=False, default=None,
+    "-e", "--p-env", required=False, default=None, type=str,
     help="Conda environment to run the job"
 )
 @click.option(
-    "-d", "--p-outdir", required=False, default='.',
-    help="Output directory (default = .)"
+    "-d", "--p-dir", required=False, help="Output directory", type=str,
+    default = '.', show_default=True
 )
 @click.option(
-    "-n", "--p-nodes", required=False, default=1,
+    "-n", "--p-nodes", required=False, default=1, type=int,
     help="Number of nodes", show_default=True
 )
 @click.option(
-    "-T", "--p-tmp", required=False, default=None,
+    "-T", "--p-tmp", required=False, default=None, type=str,
     help="Alternative temp folder to the one defined in $TMPDIR"
 )
 @click.option(
-    "-p", "--p-procs", required=False, default=4,
+    "-p", "--p-procs", required=False, default=4, type=int,
     help="Number of processors", show_default=True
 )
 @click.option(
     "-t", "--p-time", required=False, multiple=True,
-    default=['10', '00', '00'], show_default=True,
+    default=["10", "00", "00"], show_default=True,
     help="Walltime limit (max 3 integers: HH MM SS)"
 )
 @click.option(
     "-M", "--p-mem", required=False, multiple=True,
-    default=['1', 'gb'], show_default=True,
-    help="Expected memory usage (2 entries: (1) an integer, (2) one of ['b','kb', 'mb', 'gb'])"
+    default=["1", "gb"], show_default=True,
+    help="Expected memory usage (2 entries: (1) an integer, (2) one of ['b', 'kb', 'mb', 'gb'])"
 )
 @click.option(
     "-N", "--p-nodes-names", required=False, default=None,
-    multiple=True, type=click.Choice(range(55)),
+    multiple=True, type=click.Choice(map(str, range(55))),
     help="Node names by the number(s), e.g. for brncl-04, enter '4'"
 )
 @click.option(
-    "--email/--no-email", default=False,
+    "--email/--no-email", default=False, show_default=True,
     help="Send email at job completion (always if fail)"
 )
 @click.option(
@@ -78,7 +79,7 @@ from Xpbs import __version__
 )
 @click.option(
     "--noq/--no-noq", default=False, show_default=True,
-    help="Do not ask sanity check"
+    help="Do not ask for user-input 'y/n' sanity check"
 )
 @click.option(
     "--gpu/--no-gpu", default=False, show_default=True,
@@ -97,7 +98,7 @@ def run_Xpbs(
         i_job,
         p_queue,
         p_env,
-        p_out_dir,
+        p_dir,
         p_nodes,
         p_tmp,
         p_procs,
@@ -117,7 +118,7 @@ def run_Xpbs(
         i_job,
         p_queue,
         p_env,
-        p_out_dir,
+        p_dir,
         p_nodes,
         p_tmp,
         p_procs,
