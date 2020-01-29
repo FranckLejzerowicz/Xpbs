@@ -99,6 +99,14 @@ def get_email_address(folder):
 		home_user = expanduser('~')
 		with open(path) as f:
 			for line in f:
-				if line.startswith(home_user):
-					email_address = line.strip().split()[-1]
+				ls = line.strip().split()
+				break
+		if len(ls) != 2:
+			print('Problem with config file:\n- %s does not contain two columns\n-> Exiting...' % path)
+			sys.exit(1)
+		if ls[0] == '$HOME' and ls[1] == 'your-email-address@whatever.yeah':
+			print("Problem with config file:\n- %s need editing (see README's Requisites)\n-> Exiting..." % path)
+			sys.exit(1)
+		if ls[0] == home_user:
+			email_address = ls[1]
 		return email_address
