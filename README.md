@@ -18,6 +18,21 @@ python setup.py build_ext --inplace --force install
 ```
 *_Note that python should be python3_
 
+## Requisite
+
+**Attention**: it is necessary to edit the file: `Xpbs/config.txt`
+This file must contain only one line and two columns, separated by a tab or space.
+- The first column entry must be your _machine user home path_
+  - to find you _machine user home path_, just go in a terminal and type:
+    ```echo $HOME```. Then, copy and paste the returned characters as the first columns entry.
+- The second column entry must be your email address
+
+One valid example would be:
+```
+/home/edithpiaf lamome@belleville.fr
+```
+ 
+
 ## Input
 
 Two type of inputs passed to `-i` or `--i-script` are possible:
@@ -37,8 +52,11 @@ The would then needs to:
 ## Usage
 
 ```
-./Xpbs/scripts/run_Xpbs.py -i <input_path> -o <input_path> -j <job_name> [OPTIONS]
+./Xpbs/scripts/run_Xpbs.py -i <input_path> -o <output_path> -j <job_name> [OPTIONS]
 ```
+
+It is not very necessary to set values for the options `-q` and `-d`.
+
 *It's possible that you first need to `chmod 755 ./Xpbs/script/run_Xpbs.py`*
 
 ### Optional arguments
