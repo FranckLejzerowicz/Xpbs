@@ -55,9 +55,10 @@ The would then needs to:
 ./Xpbs/scripts/run_Xpbs.py -i <input_path> -o <output_path> -j <job_name> [OPTIONS]
 ```
 
-It is not very necessary to set values for the options `-q` and `-d`.
+It is not very necessary to set values for the options `-q` and `-d`, as well as for option `-N` unless you 
+have a good idea of the nodes on which you want the job to be run...
 
-*It's possible that you first need to `chmod 755 ./Xpbs/script/run_Xpbs.py`*
+*It's possible that you first need to* `chmod 755 ./Xpbs/script/run_Xpbs.py` *or to add the tool to your* `$PATH`
 
 ### Optional arguments
 
