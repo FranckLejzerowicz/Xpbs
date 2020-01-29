@@ -102,6 +102,10 @@ Options:
 ```
 
 
-Bug Reports:
------------
+### Bug Reports
+
 contact `flejzerowicz@health.ucsd.edu`
+
+### Acknowledgments
+
+Tomasz Kosciolek had been the one providing me with a first example of PBS script that collect nice job info (temp path, setup) - Thanks Tomek!
