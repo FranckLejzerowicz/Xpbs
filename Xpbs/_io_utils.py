@@ -90,22 +90,21 @@ def get_work_dir(p_dir):
 	return work_dir
 
 
-def get_email_address(folder):
-	path = '%s/config.txt' % folder
-	if not isfile(path):
-		print('Problem with config file:\n- %s do not exists\n-> Exiting...' % path)
+def get_email_address(config):
+	if not isfile(config):
+		print('Problem with config file:\n- %s do not exists\n-> Exiting...' % config)
 		sys.exit(1)
 	else:
 		home_user = expanduser('~')
-		with open(path) as f:
+		with open(config) as f:
 			for line in f:
 				ls = line.strip().split()
 				break
 		if len(ls) != 2:
-			print('Problem with config file:\n- %s does not contain two columns\n-> Exiting...' % path)
+			print('Problem with config file:\n- %s does not contain two columns\n-> Exiting...' % config)
 			sys.exit(1)
 		if ls[0] == '$HOME' and ls[1] == 'your-email-address@whatever.yeah':
-			print("Problem with config file:\n- %s need editing (see README's Requisites)\n-> Exiting..." % path)
+			print("Problem with config file:\n- %s need editing (see README's Requisites)\n-> Exiting..." % config)
 			sys.exit(1)
 		if ls[0] == home_user:
 			email_address = ls[1]
