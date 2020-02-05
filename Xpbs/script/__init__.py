@@ -6,6 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from ._Xpbs_dummy import Xpbs_dummy
+from ._standalone_xpbs import standalone_xpbs
 
-__all__ = ["Xpbs_dummy"]
+__all__ = ["standalone_xpbs"]
