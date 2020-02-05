@@ -12,7 +12,7 @@ from Xpbs._misc import chunks
 
 
 def get_time(p_time):
-    time_args = [x if len(x) == 2 else '0%s' % x for x in p_time]
+    time_args = [x if len(x) == 2 else '0%s' % x for x in [p_time]]
     time_args = [x if len(x) == 2 else x[1:] for x in time_args]
     if len(time_args):
         if len(time_args) == 1:
@@ -111,7 +111,7 @@ def get_pbs(
         else:
             nodes_ppn = 'nodes=%s:intel:ppn=%s' % (p_nodes, p_procs)
         pbs.append('#PBS -l %s' % nodes_ppn)
-        pbs.append('#PBS -l mem=%s' % (''.join(p_mem)))
+        pbs.append('#PBS -l mem=%s' % (''.join(list(p_mem))))
         # Tell PBS the anticipated run-time for your job, where walltime=HH:MM:SS
         pbs.append('#PBS -l walltime=%s' % get_time(p_time))
     return pbs
