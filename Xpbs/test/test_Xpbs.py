@@ -7,14 +7,20 @@
 # ----------------------------------------------------------------------------
 
 import unittest
+import pkg_resources
 
+#from Xpbs.Xpbs import Xpbs
+ROOT = pkg_resources.resource_filename("Xpbs", '')
 
-class MyTestCase(unittest.TestCase):
+class TestXpbs(unittest.TestCase):
 
     def setUp(self):
+        self.sh = '%s/test/test.sh' % ROOT
+        self.pbs = '%s/test/test.pbs' % ROOT
 
-    def test_get_email_address(self):
-        self.assertEqual(True, False)
+#    def test_Xpbs(self):
+ #       Xpbs(self.sh)
+  #      self.assertEqual(self.sh, self.pbs)
 
 
 if __name__ == '__main__':
