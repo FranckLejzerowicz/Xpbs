@@ -90,7 +90,8 @@ def get_work_dir(p_dir):
 	return work_dir
 
 
-def get_email_address(config):
+def get_email_address(root):
+	config = '%s/config.txt' % root
 	if not isfile(config):
 		print('Problem with config file:\n- %s do not exists\n-> Exiting...' % config)
 		sys.exit(1)

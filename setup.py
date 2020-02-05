@@ -55,6 +55,9 @@ setup(
     # See https://python-packaging.readthedocs.io/en/latest/non-code-files.html
     # for details.
     include_package_data=True,
+    package_data={
+        'Xpbs': ['config.txt'],
+    },
     install_requires=[
         "click"
     ],

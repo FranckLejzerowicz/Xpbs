@@ -1,3 +1,4 @@
+# ----------------------------------------------------------------------------
 # Copyright (c) 2020, Franck Lejzerowicz.
 #
 # Distributed under the terms of the Modified BSD License.

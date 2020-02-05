@@ -25,7 +25,7 @@ from Xpbs._check import (
 )
 from Xpbs._env import get_env
 
-CONFIG = pkg_resources.resource_filename("Xpbs", "config.txt")
+ROOT = pkg_resources.resource_filename("Xpbs", "")
 
 
 def Xpbs(
@@ -49,7 +49,7 @@ def Xpbs(
 ):
 
 	# get address from config file (which must exist)
-	email_address = get_email_address(CONFIG)
+	email_address = get_email_address(ROOT)
 
 	# get the
 	job_file = get_job_file(o_pbs, i_job, gpu)
