@@ -1,3 +1,4 @@
+#!/usr/local/bin/python3
 # ----------------------------------------------------------------------------
 # Copyright (c) 2020, Franck Lejzerowicz.
 #
@@ -51,12 +52,12 @@ from Xpbs import __version__
     help="Number of processors", show_default=True
 )
 @click.option(
-    "-t", "--p-time", required=False, multiple=True,
-    default=["10", "00", "00"], show_default=True,
-    help="Walltime limit (max 3 integers: HH MM SS)"
+    "-t", "--p-time", required=False,
+    default="10", show_default=True,
+    help="Walltime limit (1 integers: hours)"
 )
 @click.option(
-    "-M", "--p-mem", required=False, multiple=True,
+    "-M", "--p-mem", required=False, nargs=2,
     default=["1", "gb"], show_default=True,
     help="Expected memory usage (2 entries: (1) an integer, (2) one of ['b', 'kb', 'mb', 'gb'])"
 )
