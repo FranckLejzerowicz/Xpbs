@@ -15,12 +15,14 @@ classes = """
     License :: OSI Approved :: BSD License
     Topic :: Scientific/Engineering
     Topic :: Scientific/Engineering :: Bio-Informatics
-    Programming Language :: Python :: 3.6
+    Programming Language :: Python :: 3
     Programming Language :: Python :: 3 :: Only
     Operating System :: Unix
     Operating System :: POSIX
     Operating System :: MacOS :: MacOS X
 """
+
+classifiers = [s.strip() for s in classes.split('\n') if s]
 
 description = (
     "Xpbs is a command line tool allowing the conversion of a .sh script "
@@ -37,6 +39,8 @@ with open("Xpbs/__init__.py", "rb") as f:
     hit = _version_re.search(f.read().decode("utf-8")).group(1)
     version = str(ast.literal_eval(hit))
 
+standalone = ['Xpbs=Xpbs.script._standalone_xpbs:standalone_xpbs']
+
 setup(
     name="Xpbs",
     version=version,
@@ -50,15 +54,11 @@ setup(
     maintainer_email="franck.lejzerowicz@gmail.com",
     url="https://github.com/FranckLejzerowicz/Xpbs",
     packages=find_packages(),
-    # Needed in order to ensure that support_files/*, etc. are installed (in
-    # turn, these files are specified in MANIFEST.in).
-    # See https://python-packaging.readthedocs.io/en/latest/non-code-files.html
-    # for details.
-    include_package_data=True,
-    package_data={
-        'Xpbs': ['config.txt'],
-    },
     install_requires=[
         "click"
     ],
+    classifiers=classifiers,
+    entry_points={'console_scripts': standalone},
+    python_requires='>=3.6',
+    package_data={'Xpbs': ['config.txt']}
 )
