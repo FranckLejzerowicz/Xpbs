@@ -8,6 +8,7 @@
 
 import sys
 import subprocess
+import pkg_resources
 from os.path import abspath, dirname
 
 from Xpbs._io_utils import (
@@ -23,6 +24,8 @@ from Xpbs._check import (
 	check_pbs
 )
 from Xpbs._env import get_env
+
+CONFIG = pkg_resources.resource_filename("Xpbs", "config.txt")
 
 
 def Xpbs(
@@ -46,7 +49,7 @@ def Xpbs(
 ):
 
 	# get address from config file (which must exist)
-	email_address = get_email_address(dirname(abspath(__file__)))
+	email_address = get_email_address(CONFIG)
 
 	# get the
 	job_file = get_job_file(o_pbs, i_job, gpu)
