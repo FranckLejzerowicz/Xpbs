@@ -20,17 +20,15 @@ pip install -e .
 
 ## Requisite
 
-**Attention**: it is necessary to edit the file: `Xpbs/config.txt`
-This file must contain only one line and two columns, separated by a tab or space.
-- The first column entry must be your _machine user home path_
-  - to find you _machine user home path_, just go in a terminal and type:
-    ```echo $HOME```. Then, copy and paste the returned characters as the first columns entry.
-- The second column entry must be your email address
+**Attention**:
 
-One valid example would be:
-```
-/home/edithpiaf lamome@belleville.fr
-```
+1. it is necessary to edit the file: `Xpbs/config.txt`. This file must contain only one line and two columns, separated by a tab or space.
+  - The first column entry must be your _machine user home path_
+    - to find you _machine user home path_, just go in a terminal and type:
+      `echo $HOME`. Then, copy and paste the returned characters as the first columns entry.
+  - The second column entry must be your email address. One valid example would be: `/home/edithpiaf lamome@belleville.fr`
+2. please setup a temporary directory an environment variable `$TMPDIR` for temporary files to be removed after the job completes:
+  `export $TMPDIR="/Users/edith/temporary_dir""`
  
 
 ## Input
@@ -45,7 +43,7 @@ A _Torque_'s or _Slurm_'s script (if GPU are queried), including directives for 
 
 The would then needs to:
 1. Check the written `.pbs` script for modified paths or errors (**strongly** advised)
-    * especially if option `--loc` is used (copy job input files and execute on a /localscratch folder, as in this case some existing path may be copied that should not be, as for example program executatble paths...) 
+    * especially if option `-l` is used (copy job input files and execute on the given "/localscratch" folder, as in this case some existing path may be copied that should not be, as for example program executatble paths...) 
     * **attention**: if option `--run` is used, it is impossible to check (use with caution) 
 2. Run `qsub <path>.pbs` (for Torque), or `squeue <path>.sh` (for Slurm)
   
@@ -65,22 +63,25 @@ Usage: Xpbs [OPTIONS]
 
 Options:
   -i, --i-script TEXT             Script of command lines to transform to
-                                  Torque/Slurm job(Command line without '-'
-                                  also works (e.g. 'tar cpfz file.tar.gz
-                                  folder/*'))  [required]
-  -o, --o-pbs TEXT                PBS job file name
-  -j, --i-job TEXT                Job name  [required]
+                                  Torque/Slurm job.  [required]
+  -o, --o-pbs TEXT                Output job file name (default to
+                                  <input>_TIMESTAMP.pbs)
+  -j, --i-job TEXT                Job name.  [required]
   -q, --p-queue [short4gb|med4gb|med8gb|long8gb|longmem|highmem]
-                                  Queue name
-  -e, --p-env TEXT                Conda environment to run the job
+                                  Queue name.
+  -e, --p-env TEXT                Conda environment to run the job.
   -d, --p-dir TEXT                Output directory  [default: .]
   -n, --p-nodes INTEGER           Number of nodes  [default: 1]
   -T, --p-tmp TEXT                Alternative temp folder to the one defined
                                   in $TMPDIR
   -p, --p-procs INTEGER           Number of processors  [default: 4]
-  -t, --p-time TEXT               Walltime limit (max 3 integers: HH MM SS)
-                                  [default: 10, 00, 00]
-  -M, --p-mem TEXT                Expected memory usage (2 entries: (1) an
+  -t, --p-time TEXT               Walltime limit (1 integers: hours)
+                                  [default: 10]
+  -l, --p-scratch-path TEXT       Folder for moving files and computing in
+                                  (default = do not move to
+                                  scratch).ATTENTION: must be an absolute path
+                                  (i.e. starting with '/')  [default: False]
+  -M, --p-mem TEXT...             Expected memory usage (2 entries: (1) an
                                   integer, (2) one of ['b', 'kb', 'mb', 'gb'])
                                   [default: 1, gb]
   -N, --p-nodes-names [0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54]
@@ -88,17 +89,15 @@ Options:
                                   brncl-04, enter '4'
   --email / --no-email            Send email at job completion (always if
                                   fail)  [default: False]
-  --run / --no-run                'Run the PBS job before exiting (subprocess)
+  --run / --no-run                Run the PBS job before exiting (subprocess)
                                   [default: False]
-  --loc / --no-loc                Make copy of directory to /localscratch
+  --noq / --no-noq                Do not ask for user-input 'y/n' sanity check
                                   [default: False]
-  --noq / --no-noq                Do not ask sanity check  [default: False]
   --gpu / --no-gpu                Switch from Torque to Slurm (including
                                   querying 1 gpu)  [default: False]
   --version                       Show the version and exit.
-  --help                          Show this message and exit. 
+  --help                          Show this message and exit.
 ```
-
 
 ### Bug Reports
 
