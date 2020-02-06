@@ -44,8 +44,8 @@ class TestXpbs(unittest.TestCase):
 
         run_xpbs(
             self.sh1, self.pbs1_1_out_fp, 'test1', None,
-            None, '.', 1, None, 1, 1, ('1', 'mb'),
-            None, False, False, False, True, False
+            None, '.', 1, None, 1, 1, None, ('1', 'mb'),
+            None, False, False, True, False
         )
         with open(self.pbs1_1_out_fp) as f_ref:
             self.pbs1_1_out = f_ref.readlines()
@@ -55,8 +55,8 @@ class TestXpbs(unittest.TestCase):
 
         run_xpbs(
             self.sh1, self.pbs1_2_out_fp, 'test2', None,
-            'q2', '.', 2, None, 10, 200, ('10', 'gb'),
-            None, True, False, False, True, False
+            'q2', '.', 2, None, 10, 200, None, ('10', 'gb'),
+            None, True, False, True, False
         )
         with open(self.pbs1_2_out_fp) as f_ref:
             self.pbs1_2_out = f_ref.readlines()
@@ -66,8 +66,8 @@ class TestXpbs(unittest.TestCase):
 
         run_xpbs(
             self.sh2, self.pbs2_out_fp, 'test3', None,
-            'q2', '.', 2, None, 12, 10, ('1', 'gb'),
-            None, True, False, True, True, False
+            'q2', '.', 2, None, 12, 10, '/localscratch', ('1', 'gb'),
+            None, True, False, True, False
         )
         with open(self.pbs2_out_fp) as f_ref:
             self.pbs2_out = f_ref.readlines()

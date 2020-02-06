@@ -12,7 +12,7 @@ from os.path import abspath, exists, expanduser, isfile
 from pathlib import Path
 
 
-def write_job(i_job: str, job_file: str, pbs: list, env: list, loc: bool,
+def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: str,
               gpu: bool, commands: list, ff_dirs: dict) -> None:
     """
     Write the actual .pbs / slurm .sh script based on
@@ -22,7 +22,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, loc: bool,
     :param job_file: output filename for the job.
     :param pbs: actual series of commands, incl. the HPC directives.
     :param env: command to setup the environment.
-    :param loc: whether to work on a scratch folder or not.
+    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
     :param gpu: whether to run on GPU or not (and hence use Slurm in our case)
     :param commands: commands list.
     :param ff_dirs: folders to move on scratch.
@@ -46,7 +46,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, loc: bool,
         o.write('\n')
 
         # if running on scratch, write commands to make directory for moved files/folders
-        if loc:
+        if p_scratch_path:
             for f_home, f_loc in ff_dirs.items():
                 o.write('mkdir -p %s\n' % f_loc)
             o.write('\n')
@@ -55,7 +55,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, loc: bool,
         # write the actual commands script
         for command in commands:
             # if running on scratch, including the actual files/folders moves
-            if loc:
+            if p_scratch_path:
                 for f_home, f_loc in ff_dirs.items():
                     if f_home in command:
                         command = command.replace(f_home, f_loc)
@@ -64,7 +64,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, loc: bool,
         o.write('\n')
 
         # if running on scratch, write commands that move files back
-        if loc:
+        if p_scratch_path:
             for f_home, f_loc in ff_dirs.items():
                 o.write('rsync -auq %s/ %s\n' % (f_loc, f_home))
             if gpu:
@@ -157,7 +157,7 @@ def get_email_address(root: str) -> str:
             sys.exit(1)
         # only get the actual $HOME value for the current user
         if ls[0] != expanduser('~'):
-            print("Problem with config file:\n- The first field must be the value of $HOME"
+            print("Problem with config file: %s\n- The first field must be the value of $HOME"
                   "(see README's Requisites)\n-> Exiting..." % config)
             sys.exit(1)
         # return the passed email address and not just the dummy default

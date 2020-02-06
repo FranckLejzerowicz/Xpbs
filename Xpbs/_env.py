@@ -10,12 +10,22 @@ from os.path import abspath, dirname, exists
 
 
 def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
-            gpu: bool, loc: bool, ff_paths: dict) -> list:
+            gpu: bool, p_scratch_path: str, ff_paths: dict) -> list:
     """
     Get the lines to be written as header to the job
     Including:
     - the conda environment for the job
     - the temporary directory
+
+    :param i_job: job name.
+    :param o_pbs: output script filename.
+    :param p_env: Conda environment to run the job.
+    :param p_tmp: Alternative temp folder to the one defined in $TMPDIR.
+    :param work_dir: Output directory.
+    :param gpu: whether to run on GPU or not (and hence use Slurm in our case).
+    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
+    :param ff_paths: local -> scratch file paths to be updated.
+    :return: the commands for the compute environment.
     """
     # environment variables get collected / printed
     env = ['set -e', 'uname -a']
@@ -75,12 +85,12 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
         env.append('echo "%s/%s_*.e"' % (out_dir, i_job))
 
     # if running on /localscratch
-    if loc:
+    if p_scratch_path:
         # get the output directory for the job
         if exists(work_dir) and work_dir != '.':
-            locdir = '/localscratch/%s_${%s}/%s' % (i_job, job_id, work_dir.strip('/'))
+            locdir = '%s/%s_${%s}/%s' % (p_scratch_path, i_job, job_id, work_dir.strip('/'))
         else:
-            locdir = '/localscratch/%s_${%s}' % (i_job, job_id)
+            locdir = '%s/%s_${%s}' % (p_scratch_path, i_job, job_id)
         env.append('locdir=%s' % locdir)
         # create fresh folder
         env.append('rm -rf ${locdir}')

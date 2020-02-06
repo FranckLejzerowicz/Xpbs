@@ -14,7 +14,7 @@ from os.path import abspath, dirname, exists, isfile
 def collect_ff(abs_line: str, ff_paths: dict,
                ff_dirs: dict) -> (dict, dict):
     """
-    This function is run when the --loc options is ON
+    This function is run when the -l options is ON
     It will copy all the files that the job works on into
     the compute node /localscratch where the job will perform
     and the copy back the results in the original folder
@@ -40,12 +40,12 @@ def collect_ff(abs_line: str, ff_paths: dict,
     return ff_paths, ff_dirs
 
 
-def get_commands_file(loc: bool, path: str, commands: list,
+def get_commands_file(p_scratch_path: str, path: str, commands: list,
                       ff_paths: dict, ff_dirs: dict) -> (list, dict, dict):
     """
     Parse the .sh file and collect the actual script commands.
 
-    :param loc: whether to work on a scratch folder or not.
+    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
     :param path: script file.
     :param commands: full list of commands to be appended.
     :param ff_paths: files to move on scratch.
@@ -67,7 +67,11 @@ def get_commands_file(loc: bool, path: str, commands: list,
             # add this command with modified path to abspath as a new command
             commands.append(abs_line)
             # if it is asked to work on a scratch folder
-            if loc:
+            if p_scratch_path:
+                if p_scratch_path[0] != '/':
+                    print('scrtach folder path must by absolute, i.e. start with "/"'
+                          '.. Do you mean "/%s" ?\nExiting...' % p_scratch_path)
+                    sys.exit(1)
                 # get the path to be moved to this scratch
                 ff_paths, ff_dirs = collect_ff(
                     abs_line, ff_paths, ff_dirs
@@ -75,7 +79,7 @@ def get_commands_file(loc: bool, path: str, commands: list,
     return commands, ff_paths, ff_dirs
 
 
-def get_commands_args(loc: bool, i_script: list, ff_paths: dict,
+def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: dict,
                       ff_dirs: dict) -> (list, dict, dict):
     """
     ########################
@@ -84,7 +88,7 @@ def get_commands_args(loc: bool, i_script: list, ff_paths: dict,
     Parse the argument directly passed in the command line to Xpby
     and make a pbs script transformation for them.
 
-    :param loc: whether to work on a scratch folder or not.
+    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
     :param i_script: direct command line.
     :param ff_paths: files to move on scratch.
     :param ff_dirs: folders to move on scratch.
@@ -98,19 +102,19 @@ def get_commands_args(loc: bool, i_script: list, ff_paths: dict,
         [abspath(x) if exists(x) or len(glob(x)) else x for x in i_script]
     )
     commands = [abs_line]
-    if loc:
+    if p_scratch_path:
         ff_paths, ff_dirs = collect_ff(
             abs_line, ff_paths, ff_dirs
         )
     return commands, ff_paths, ff_dirs
 
 
-def parse_command(i_script: str, loc: bool) -> (list, dict, dict):
+def parse_command(i_script: str, p_scratch_path: str) -> (list, dict, dict):
     """
     Main interpreter of the passed scripts / command to the -i option.
 
     :param i_script: script file.
-    :param loc: whether to work on a scratch folder or not.
+    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
     :return:
         commands    : appended commands list.
         ff_paths    : files to be moved for /localscratch jobs.
@@ -124,7 +128,7 @@ def parse_command(i_script: str, loc: bool) -> (list, dict, dict):
     if isfile(i_script):
         # get the command from the file content
         commands, ff_paths, ff_dirs = get_commands_file(
-            loc, i_script, commands, ff_paths, ff_dirs
+            p_scratch_path, i_script, commands, ff_paths, ff_dirs
         )
     # if the script file does not exists
     # (-> it could be a command passed directly to the command line)

@@ -21,16 +21,16 @@ from Xpbs import __version__
 	help="Output job file name (default to <input>_TIMESTAMP.pbs)"
 )
 @click.option(
-	"-j", "--i-job", required=True, type=str, help="Job name"
+	"-j", "--i-job", required=True, type=str, help="Job name."
 )
 @click.option(
 	"-q", "--p-queue", required=False, default=None,
 	type=click.Choice(['short4gb','med4gb','med8gb','long8gb','longmem','highmem']),
-	help="Queue name"
+	help="Queue name."
 )
 @click.option(
 	"-e", "--p-env", required=False, default=None, type=str,
-	help="Conda environment to run the job"
+	help="Conda environment to run the job."
 )
 @click.option(
 	"-d", "--p-dir", required=False, help="Output directory", type=str,
@@ -54,6 +54,11 @@ from Xpbs import __version__
 	help="Walltime limit (1 integers: hours)"
 )
 @click.option(
+	"-l", "--p-scratch-path", default=False, show_default=True,
+	help="Folder for moving files and computing in (default = do not move to scratch)."
+		 "ATTENTION: must be an absolute path (i.e. starting with '/')"
+)
+@click.option(
 	"-M", "--p-mem", required=False, nargs=2,
 	default=["1", "gb"], show_default=True,
 	help="Expected memory usage (2 entries: (1) an integer, (2) one of ['b', 'kb', 'mb', 'gb'])"
@@ -69,11 +74,7 @@ from Xpbs import __version__
 )
 @click.option(
 	"--run/--no-run", default=False, show_default=True,
-	help="'Run the PBS job before exiting (subprocess)"
-)
-@click.option(
-	"--loc/--no-loc", default=False, show_default=True,
-	help="Make copy of directory to /localscratch"
+	help="Run the PBS job before exiting (subprocess)"
 )
 @click.option(
 	"--noq/--no-noq", default=False, show_default=True,
@@ -97,11 +98,11 @@ def standalone_xpbs(
 		p_tmp,
 		p_procs,
 		p_time,
+		p_scratch_path,
 		p_mem,
 		p_nodes_names,
 		email,
 		run,
-		loc,
 		noq,
 		gpu
 ):
@@ -117,11 +118,11 @@ def standalone_xpbs(
 		p_tmp,
 		p_procs,
 		p_time,
+		p_scratch_path,
 		p_mem,
 		p_nodes_names,
 		email,
 		run,
-		loc,
 		noq,
 		gpu
 	)
