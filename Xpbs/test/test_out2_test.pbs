@@ -1,0 +1,40 @@
+#!/bin/bash
+#PBS -V
+#PBS -N test2
+#PBS -m ae
+#PBS -M flejzerowicz@ucsd.edu
+#PBS -o localhost:/Data/Programs/Xpbs/Xpbs/test/test2_${PBS_JOBID}.o
+#PBS -e localhost:/Data/Programs/Xpbs/Xpbs/test/test2_${PBS_JOBID}.e
+#PBS -l nodes=2:intel:ppn=10
+#PBS -l mem=10gb
+#PBS -l walltime=200:00:00
+
+
+set -e
+uname -a
+echo "Conda environment is q2"
+source activate q2
+mkdir -p $TMPDIR/test2_${PBS_JOBNUM}
+export TMPDIR=$TMPDIR/test2_${PBS_JOBNUM}
+echo Temporary directory is $TMPDIR
+echo Running on host `hostname`
+echo Time is `date`
+echo Directory is `pwd`
+NPROCS=`wc -l < $PBS_NODEFILE`
+NNODES=`uniq $PBS_NODEFILE | wc -l`
+echo Using ${NPROCS} processors across ${NNODES} nodes
+echo "/Data/Programs/Xpbs/Xpbs/test/test2_*.o"
+echo "/Data/Programs/Xpbs/Xpbs/test/test2_*.e"
+cd $PBS_O_WORKDIR
+echo Working directory is $PBS_O_WORKDIR
+echo "Job file:"
+echo "/Data/Programs/Xpbs/Xpbs/test/test_out2_test.pbs"
+
+
+echo "Bim"
+
+
+
+rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}
+echo "rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}"
+echo "Done!"

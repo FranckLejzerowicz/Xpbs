@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -V
+#PBS -N test1
+#PBS -m a
+#PBS -M flejzerowicz@ucsd.edu
+#PBS -o localhost:/Data/Programs/Xpbs/Xpbs/test/test1_${PBS_JOBID}.o
+#PBS -e localhost:/Data/Programs/Xpbs/Xpbs/test/test1_${PBS_JOBID}.e
+#PBS -l nodes=1:intel:ppn=1
+#PBS -l mem=1mb
+#PBS -l walltime=1:00:00
+
+
+set -e
+uname -a
+mkdir -p $TMPDIR/test1_${PBS_JOBNUM}
+export TMPDIR=$TMPDIR/test1_${PBS_JOBNUM}
+echo Temporary directory is $TMPDIR
+echo Running on host `hostname`
+echo Time is `date`
+echo Directory is `pwd`
+NPROCS=`wc -l < $PBS_NODEFILE`
+NNODES=`uniq $PBS_NODEFILE | wc -l`
+echo Using ${NPROCS} processors across ${NNODES} nodes
+echo "/Data/Programs/Xpbs/Xpbs/test/test1_*.o"
+echo "/Data/Programs/Xpbs/Xpbs/test/test1_*.e"
+cd $PBS_O_WORKDIR
+echo Working directory is $PBS_O_WORKDIR
+echo "Job file:"
+echo "/Data/Programs/Xpbs/Xpbs/test/test_out1_test.pbs"
+
+
+echo "Bim"
+
+
+
+rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}
+echo "rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}"
+echo "Done!"
