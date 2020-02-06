@@ -14,11 +14,11 @@ From the user is only needed (1) email address and (2) path to a temporary folde
 ```
 git clone https://github.com/FranckLejzerowicz/Xpbs.git
 cd Xpbs
-python setup.py build_ext --inplace --force install
+python3 setup.py build_ext --inplace --force install
 ```
 or
 ```
-pip install -i https://test.pypi.org/simple/ Xpbs==0.1.0
+pip install git+https://github.com/FranckLejzerowicz/Xpbs.git
 ```
 *_Note that python should be python3_
 
