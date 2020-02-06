@@ -9,35 +9,28 @@
 from os.path import abspath, dirname, exists
 
 
-def get_env(
-        i_job,
-        o_pbs,
-        p_env,
-        p_tmp,
-        work_dir,
-        gpu,
-        loc,
-        ff_paths
-):
+def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
+            gpu: bool, loc: bool, ff_paths: dict) -> list:
     """
     Get the lines to be written as header to the job
     Including:
     - the conda environment for the job
     - the temporary directory
     """
+    # environment variables get collected / printed
     env = ['set -e', 'uname -a']
+    # if a conda environment is used
     if p_env:
+        # activate the env
         if p_env == 'mmvec':
+            # and it is mmvec (specific here... should be deleted at some point!)
             env.append('echo "module load tensorflow_1.14.0"')
             env.append('module load tensorflow_1.14.0')
         else:
             env.append('echo "Conda environment is %s"' % p_env)
             env.append('source activate %s' % p_env)
 
-    # temporary folder
-    if p_tmp:
-        env.append("export TMPDIR='%s'" % p_tmp.rstrip('/'))
-
+    # get the Torque / Slurm env variables ready for more generic usage below
     if gpu:
         job_id = 'SLURM_JOB_ID'
         job_dir = 'SLURM_SUBMIT_DIR'
@@ -48,30 +41,14 @@ def get_env(
         job_dir = 'PBS_O_WORKDIR'
         job_procs = 'NPROCS'
         job_nodes = 'NNODES'
+
+    # set temporary folder
+    if p_tmp:
+        env.append("export TMPDIR='%s'" % p_tmp.rstrip('/'))
+    # create the temporary folder
     env.append('mkdir -p $TMPDIR/%s_${%s}' % (i_job, job_id))
     env.append('export TMPDIR=$TMPDIR/%s_${%s}' % (i_job, job_id))
     env.append("echo Temporary directory is $TMPDIR")
-
-    # if running on /localscratch
-    if loc:
-        # get the output directory for the job
-        if exists(work_dir) and work_dir != '.':
-            locdir = '/localscratch/%s_${%s}/%s' % (i_job, job_id, work_dir.strip('/'))
-        else:
-            locdir = '/localscratch/%s_${%s}' % (i_job, job_id)
-        env.append('locdir=%s' % locdir)
-        # create fresh folder
-        env.append('rm -rf ${locdir}')
-        env.append('mkdir -p ${locdir}')
-        env.append('cd ${locdir}')
-        for f_home in sorted(ff_paths):
-            # env.append('rsync -aq %s ${locdir}' % f_home)
-            env.append('cp -r --parents %s ${locdir}' % f_home)
-        env.append('echo Working directory is ${locdir}')
-    else:
-        ### Switch to working directory; default is home directory.
-        env.append('cd $%s' % job_dir)
-        env.append('echo Working directory is $%s' % job_dir)
 
     ### Display the job context
     env.append('echo Running on host `hostname`')
@@ -96,4 +73,26 @@ def get_env(
     else:
         env.append('echo "%s/%s_*.o"' % (out_dir, i_job))
         env.append('echo "%s/%s_*.e"' % (out_dir, i_job))
+
+    # if running on /localscratch
+    if loc:
+        # get the output directory for the job
+        if exists(work_dir) and work_dir != '.':
+            locdir = '/localscratch/%s_${%s}/%s' % (i_job, job_id, work_dir.strip('/'))
+        else:
+            locdir = '/localscratch/%s_${%s}' % (i_job, job_id)
+        env.append('locdir=%s' % locdir)
+        # create fresh folder
+        env.append('rm -rf ${locdir}')
+        env.append('mkdir -p ${locdir}')
+        env.append('cd ${locdir}')
+        for f_home in sorted(ff_paths):
+            # env.append('rsync -aq %s ${locdir}' % f_home)
+            env.append('cp -r --parents %s ${locdir}' % f_home)
+        env.append('echo Working directory is ${locdir}')
+    else:
+        ### Switch to working directory; default is home directory.
+        env.append('cd $%s' % job_dir)
+        env.append('echo Working directory is $%s' % job_dir)
+
     return env
