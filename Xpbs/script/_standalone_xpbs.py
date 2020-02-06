@@ -13,9 +13,8 @@ from Xpbs import __version__
 
 @click.command()
 @click.option(
-	"-i", "--i-script", required=True, multiple=True,
-	help="Script of command lines to transform to Torque/Slurm job"
-		 "(Command line without '-' also works (e.g. 'tar cpfz file.tar.gz folder/*'))"
+	"-i", "--i-script", required=True, nargs=1,
+	help="Script of command lines to transform to Torque/Slurm job."
 )
 @click.option(
 	"-o", "--o-pbs", required=False, default=None, type=str,
@@ -106,6 +105,7 @@ def standalone_xpbs(
 		noq,
 		gpu
 ):
+
 	run_xpbs(
 		i_script,
 		o_pbs,
