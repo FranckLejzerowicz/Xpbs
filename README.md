@@ -52,18 +52,16 @@ The would then needs to:
 ## Usage
 
 ```
-./Xpbs/scripts/run_Xpbs.py -i <input_path> -o <output_path> -j <job_name> [OPTIONS]
+Xpbs.py -i <input_path> -o <output_path> -j <job_name> [OPTIONS]
 ```
 
 It is not very necessary to set values for the options `-q` and `-d`, as well as for option `-N` unless you 
 have a good idea of the nodes on which you want the job to be run...
 
-*It's possible that you first need to* `chmod 755 ./Xpbs/script/run_Xpbs.py` *or to add the tool to your* `$PATH`
-
 ### Optional arguments
 
 ``` 
-Usage: run_Xpbs.py [OPTIONS]
+Usage: Xpbs [OPTIONS]
 
 Options:
   -i, --i-script TEXT             Script of command lines to transform to
