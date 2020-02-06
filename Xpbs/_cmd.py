@@ -6,48 +6,94 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import sys
 from glob import glob
-from os.path import (
-    abspath, dirname, exists, isfile
-)
+from os.path import abspath, dirname, exists, isfile
 
 
-def collect_ff(abs_line, ff_paths, ff_dirs):
+def collect_ff(abs_line: str, ff_paths: dict,
+               ff_dirs: dict) -> (dict, dict):
     """
     This function is run when the --loc options is ON
     It will copy all the files that the job works on into
     the compute node /localscratch where the job will perform
     and the copy back the results in the original folder
+
+    :param abs_line: list of absolute paths to a file or folder.
+    :param ff_paths: local -> scratch file paths to be updated.
+    :param ff_dirs: local -> scratch folder paths to be updated.
+    :return: ff_paths and ff_dirs updated with new file and folder paths.
     """
+    # for each term of the stripped and space-separated command
     for abs_i in abs_line.strip().split():
+        # re-strip the possible quotes in file names
         abs_i_s = abs_i.strip('"').strip("'")
+        # get the local -> scratch paths mapping of existing files/folders
         if exists(abs_i_s):
-            print('AAA')
             abs_d = dirname(abs_i_s)
             ff_paths[abs_i_s] = '${locdir}%s' % abs_i_s
             ff_dirs[abs_d] = '${locdir}%s' % dirname(abs_i_s)
+        # get only local -> scratch folder paths mapping for root based folders
         elif abs_i_s[0] == '/':
             abs_d = dirname(abs_i_s)
             ff_dirs[abs_d] = '${locdir}%s' % dirname(abs_i_s)
     return ff_paths, ff_dirs
 
 
-def get_commands_file(loc, path, commands, ff_paths, ff_dirs):
+def get_commands_file(loc: bool, path: str, commands: list,
+                      ff_paths: dict, ff_dirs: dict) -> (list, dict, dict):
+    """
+    Parse the .sh file and collect the actual script commands.
+
+    :param loc: whether to work on a scratch folder or not.
+    :param path: script file.
+    :param commands: full list of commands to be appended.
+    :param ff_paths: files to move on scratch.
+    :param ff_dirs: folders to move on scratch.
+    :return:
+        commands    : appended commands list.
+        ff_paths    : files to be moved for /localscratch jobs.
+        ff_dirs     : folders to be moved for /localscratch jobs.
+    """
+
     with open(path) as f:
+        # for each command of the script
         for line in f:
+            # collect the absolute paths of the files/folders that exist or keep words as are
             abs_line = ' '.join(
                 [abspath(x) if exists(x) or len(glob(x)) else x for x in
                  line.strip().split()]
             )
+            # add this command with modified path to abspath as a new command
             commands.append(abs_line)
+            # if it is asked to work on a scratch folder
             if loc:
+                # get the path to be moved to this scratch
                 ff_paths, ff_dirs = collect_ff(
                     abs_line, ff_paths, ff_dirs
                 )
     return commands, ff_paths, ff_dirs
 
 
-def get_commands_args(loc, i_script, ff_paths, ff_dirs):
+def get_commands_args(loc: bool, i_script: list, ff_paths: dict,
+                      ff_dirs: dict) -> (list, dict, dict):
+    """
+    ########################
+    ## NOT USED CURRENTLY ##
+    ########################
+    Parse the argument directly passed in the command line to Xpby
+    and make a pbs script transformation for them.
+
+    :param loc: whether to work on a scratch folder or not.
+    :param i_script: direct command line.
+    :param ff_paths: files to move on scratch.
+    :param ff_dirs: folders to move on scratch.
+    :return:
+        commands    : appended commands list.
+        ff_paths    : files to be moved for /localscratch jobs.
+        ff_dirs     : folders to be moved for /localscratch jobs.
+    """
+
     abs_line = ' '.join(
         [abspath(x) if exists(x) or len(glob(x)) else x for x in i_script]
     )
@@ -59,18 +105,31 @@ def get_commands_args(loc, i_script, ff_paths, ff_dirs):
     return commands, ff_paths, ff_dirs
 
 
-def parse_command(i_script, loc):
-    commands = []
-    ff_paths = {}
+def parse_command(i_script: str, loc: bool) -> (list, dict, dict):
+    """
+    Main interpreter of the passed scripts / command to the -i option.
+
+    :param i_script: script file.
+    :param loc: whether to work on a scratch folder or not.
+    :return:
+        commands    : appended commands list.
+        ff_paths    : files to be moved for /localscratch jobs.
+        ff_dirs     : folders to be moved for /localscratch jobs.
+    """
+
     ff_dirs = {}
-    for path in i_script:
-        if isfile(path):
-            commands, ff_paths, ff_dirs = get_commands_file(
-                loc, path, commands, ff_paths, ff_dirs
-            )
-        else:
-            commands, ff_paths, ff_dirs = get_commands_args(
-                loc, i_script, ff_paths, ff_dirs
-            )
-            break
+    ff_paths = {}
+    commands = []
+    # if the script file exists
+    if isfile(i_script):
+        # get the command from the file content
+        commands, ff_paths, ff_dirs = get_commands_file(
+            loc, i_script, commands, ff_paths, ff_dirs
+        )
+    # if the script file does not exists
+    # (-> it could be a command passed directly to the command line)
+    else:
+        # potential development to use "get_commands_args()"...
+        print('%s does not exists\nExiting...' % i_script)
+        sys.exit(1)
     return commands, ff_paths, ff_dirs
