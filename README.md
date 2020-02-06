@@ -52,7 +52,7 @@ The would then needs to:
 ## Usage
 
 ```
-Xpbs.py -i <input_path> -o <output_path> -j <job_name> [OPTIONS]
+Xpbs -i <input_path> -o <output_path> -j <job_name> [OPTIONS]
 ```
 
 It is not very necessary to set values for the options `-q` and `-d`, as well as for option `-N` unless you 
