@@ -8,53 +8,67 @@
 
 import sys
 from os.path import dirname, abspath
-from Xpbs._misc import chunks
 
 
-def get_time(p_time):
-    time_args = [x if len(x) == 2 else '0%s' % x for x in [p_time]]
-    time_args = [x if len(x) == 2 else x[1:] for x in time_args]
-    if len(time_args):
-        if len(time_args) == 1:
-            time = '%s:00:00' % time_args[0]
-        elif len(time_args) == 2:
-            time = '%s:00' % ':'.join(time_args)
-        else:
-            time = ':'.join(time_args)
-    else:
-        print('Problem with time:', time_args)
-        sys.exit(1)
-    return time
+def chunks(l, chunk_number):
+    # Adapted from:
+    # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
+    n = len(l) // chunk_number
+    return [l[i:i + n] for i in range(0, len(l), n)]
 
 
-def get_nodes_ppn(n_, p):
+def get_nodes_ppn(n_: int, p: int) -> str:
+    """
+    Distribute the number of processors requested among the requested nodes.
+
+    :param n_: number of nodes requested.
+    :param p: number of processors requested.
+    :return:
+    """
+    # get the string version of the passed nodes numbers
     n = ['0%s' % n if n < 10 else str(n) for n in n_]
     if p == 1:
+        # get the barnacle nodes with one processor per node if one processor is queried
         nodes_ppn = 'nodes=' + '+'.join(['brncl-%s:ppn=1' % i for i in n])
     else:
+        # otherwise get the number of nodes
         nn = len(n)
-        ps = [sum(x) for x in chunks(([1] * p), 0, nn)]
+        # distribute the total numbers of processors of a number chunks equal to the number of nodes
+        ps = [sum(x) for x in chunks(([1] * p), nn)]
+
+        # this error is unlikely ot happen but would let people query the developer for a better way to do this!
         if sum(ps) != p:
             print('issue with the processors allocation\n- check function "get_nodes_ppn")')
             sys.exit(1)
+        # make the directive for the distributed processors across node
         nodes_ppn = 'nodes=' + '+'.join(['brncl-%s:ppn=%s' % (i, ps[idx]) for idx, i in enumerate(n)])
     return nodes_ppn
 
 
-def get_pbs(
-        i_job,
-        o_pbs,
-        p_time,
-        p_queue,
-        p_nodes,
-        p_procs,
-        p_nodes_names,
-        p_mem,
-        gpu,
-        email,
-        email_address
-):
+def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
+            p_procs: int, p_nodes_names, p_mem: tuple, gpu: bool,
+            email: bool, email_address: str) -> list:
+    """
+    Collect the directives for the Torque or Slurm job.
+
+    :param i_job: job name.
+    :param o_pbs: output script filename.
+    :param p_time: number of hours for the job to complete (or abort).
+    :param p_queue: queue to add the job to.
+    :param p_nodes: number of nodes to query.
+    :param p_procs: number of processors to query.
+    :param p_nodes_names: numeric names of the nodes to query.
+    :param p_mem: memory usage (number, dimesion).
+    :param gpu: whether to run on GPU or not (and hence use Slurm in our case).
+    :param email: whether to send email at job completion.
+    :param email_address: email address passed by the user.
+    :return: script
+    """
+
+    # add a shebang that's hopefully universal here.
     pbs = ['#!/bin/bash']
+
+    # if running on GPU : using Slurm
     if gpu:
         pbs.append('#SBATCH --export=ALL')
         pbs.append('#SBATCH --job-name=%s' % i_job)
@@ -87,8 +101,9 @@ def get_pbs(
         if m_byt == 'gb':
             m_num = int(m_num * 1000)
         pbs.append('#SBATCH --mem=%s' % m_num)
-        # Tell PBS the anticipated run-time for your job, where walltime=HH:MM:SS
-        pbs.append('#SBATCH --time=%s' % get_time(p_time))
+        pbs.append('#SBATCH --time=%s:00:00' % p_time)
+
+    # if running on CPU : using Torque.
     else:
         pbs.append('#PBS -V')
         pbs.append('#PBS -N %s' % i_job)
@@ -105,13 +120,11 @@ def get_pbs(
             out_dir = '${PBS_O_WORKDIR}'
         pbs.append('#PBS -o localhost:%s/%s_${PBS_JOBID}.o' % (out_dir, i_job))
         pbs.append('#PBS -e localhost:%s/%s_${PBS_JOBID}.e' % (out_dir, i_job))
-        # Specify number of CPUs (nodes, processors per node) and of memory
         if p_nodes_names:
             nodes_ppn = get_nodes_ppn(p_nodes_names, p_procs)
         else:
             nodes_ppn = 'nodes=%s:intel:ppn=%s' % (p_nodes, p_procs)
         pbs.append('#PBS -l %s' % nodes_ppn)
         pbs.append('#PBS -l mem=%s' % (''.join(list(p_mem))))
-        # Tell PBS the anticipated run-time for your job, where walltime=HH:MM:SS
-        pbs.append('#PBS -l walltime=%s' % get_time(p_time))
+        pbs.append('#PBS -l walltime=%s:00:00' % p_time)
     return pbs
