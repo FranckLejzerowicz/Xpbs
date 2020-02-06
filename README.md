@@ -16,6 +16,10 @@ git clone https://github.com/FranckLejzerowicz/Xpbs.git
 cd Xpbs
 pip install -e .
 ```
+or
+```
+pip install -i https://test.pypi.org/simple/ Xpbs==0.1.0
+```
 *_Note that python should be python3_
 
 ## Requisite
