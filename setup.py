@@ -11,7 +11,6 @@ import re, ast
 from setuptools import find_packages, setup
 
 classes = """
-    Development Status :: Alpha
     License :: OSI Approved :: BSD License
     Topic :: Scientific/Engineering
     Topic :: Scientific/Engineering :: Bio-Informatics
