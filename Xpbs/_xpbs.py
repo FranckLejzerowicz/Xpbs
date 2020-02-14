@@ -64,7 +64,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
 
     # ff is not empty only if the -l is active
     # (i.e. if user wishes that the job happens on /localscratch file copies)
-    commands, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path)
+    commands, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path, p_env)
 
     # pbs directives
     pbs = get_pbs(i_job, o_pbs, p_time, p_queue, p_nodes, p_procs,

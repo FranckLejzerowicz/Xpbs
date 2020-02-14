@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 
 import sys
+import subprocess
 from glob import glob
 from os.path import abspath, dirname, exists, isfile
 
@@ -60,10 +61,17 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list,
         # for each command of the script
         for line in f:
             # collect the absolute paths of the files/folders that exist or keep words as are
-            abs_line = ' '.join(
-                [abspath(x) if exists(x) or len(glob(x)) else x for x in
-                 line.strip().split()]
-            )
+            abs_line = []
+            for x in line.strip().split():
+                if exists(x) or len(glob(x)):
+                    if subprocess.getoutput('which %s')[0]:
+                        abs_line.append(x)
+                    else:
+                        abs_line.append(abspath(x))
+                else:
+                    abs_line.append(x)
+            abs_line = ' '.join(abs_line)
+
             # add this command with modified path to abspath as a new command
             commands.append(abs_line)
             # if it is asked to work on a scratch folder
@@ -98,9 +106,17 @@ def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: dict,
         ff_dirs     : folders to be moved for /localscratch jobs.
     """
 
-    abs_line = ' '.join(
-        [abspath(x) if exists(x) or len(glob(x)) else x for x in i_script]
-    )
+    abs_line = []
+    for x in i_script:
+        if exists(x) or len(glob(x)):
+            if subprocess.getoutput('which %s')[0]:
+                abs_line.append(x)
+            else:
+                abs_line.append(abspath(x))
+        else:
+            abs_line.append(x)
+    abs_line = ' '.join(abs_line)
+
     commands = [abs_line]
     if p_scratch_path:
         ff_paths, ff_dirs = collect_ff(
@@ -109,17 +125,20 @@ def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: dict,
     return commands, ff_paths, ff_dirs
 
 
-def parse_command(i_script: str, p_scratch_path: str) -> (list, dict, dict):
+def parse_command(i_script: str, p_scratch_path: str, p_env: str) -> (list, dict, dict):
     """
     Main interpreter of the passed scripts / command to the -i option.
 
     :param i_script: script file.
     :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
+    :param p_env: Conda environment to run the job.
     :return:
         commands    : appended commands list.
         ff_paths    : files to be moved for /localscratch jobs.
         ff_dirs     : folders to be moved for /localscratch jobs.
     """
+
+
 
     ff_dirs = {}
     ff_paths = {}
