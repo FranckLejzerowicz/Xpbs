@@ -50,7 +50,9 @@ def collect_abs_paths(line: str) -> str:
     """
     abs_line = []
     for x in line.strip().split():
-        if exists(x) or len(glob(x)):
+        if x.startswith('/'):
+            abs_line.append(x)
+        elif exists(x) or len(glob(x)):
             print("")
             print("")
             print("")
