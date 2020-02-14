@@ -41,6 +41,26 @@ def collect_ff(abs_line: str, ff_paths: dict,
     return ff_paths, ff_dirs
 
 
+def collect_abs_paths(line: str) -> str:
+    """
+    Turn the words that have a path into abspath (except for executable).
+
+    :param line: command line in list
+    :return: concatenate string into abspath'ed command line
+    """
+    abs_line = []
+    for x in line.strip().split():
+        if exists(x) or len(glob(x)):
+            if subprocess.getstatusoutput('which %s')[0]:
+                abs_line.append(x)
+            else:
+                abs_line.append(abspath(x))
+        else:
+            abs_line.append(x)
+    abs_line = ' '.join(abs_line)
+    return abs_line
+
+
 def get_commands_file(p_scratch_path: str, path: str, commands: list,
                       ff_paths: dict, ff_dirs: dict) -> (list, dict, dict):
     """
@@ -61,17 +81,7 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list,
         # for each command of the script
         for line in f:
             # collect the absolute paths of the files/folders that exist or keep words as are
-            abs_line = []
-            for x in line.strip().split():
-                if exists(x) or len(glob(x)):
-                    if subprocess.getoutput('which %s')[0]:
-                        abs_line.append(x)
-                    else:
-                        abs_line.append(abspath(x))
-                else:
-                    abs_line.append(x)
-            abs_line = ' '.join(abs_line)
-
+            abs_line = collect_abs_paths(line)
             # add this command with modified path to abspath as a new command
             commands.append(abs_line)
             # if it is asked to work on a scratch folder
