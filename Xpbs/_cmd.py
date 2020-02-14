@@ -56,9 +56,9 @@ def collect_abs_paths(line: str) -> str:
             print("")
             print("")
             print("")
-            print("subprocess.getstatusoutput('which %s')")
-            print(subprocess.getstatusoutput('which %s'))
-            if subprocess.getstatusoutput('which %s')[0]:
+            print("subprocess.getstatusoutput('which %s')" % x)
+            print(subprocess.getstatusoutput('which %s' % x))
+            if subprocess.getstatusoutput('which %s' % x)[0]:
                 abs_line.append(x)
             else:
                 abs_line.append(abspath(x))
