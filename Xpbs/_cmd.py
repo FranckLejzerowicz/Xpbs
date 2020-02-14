@@ -51,6 +51,11 @@ def collect_abs_paths(line: str) -> str:
     abs_line = []
     for x in line.strip().split():
         if exists(x) or len(glob(x)):
+            print("")
+            print("")
+            print("")
+            print("subprocess.getstatusoutput('which %s')")
+            print(subprocess.getstatusoutput('which %s'))
             if subprocess.getstatusoutput('which %s')[0]:
                 abs_line.append(x)
             else:
