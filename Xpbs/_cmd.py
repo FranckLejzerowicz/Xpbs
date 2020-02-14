@@ -9,7 +9,7 @@
 import sys
 import subprocess
 from glob import glob
-from os.path import abspath, dirname, exists, isfile
+from os.path import abspath, dirname, exists, isfile, basename
 
 
 def collect_ff(abs_line: str, ff_paths: dict,
@@ -41,24 +41,29 @@ def collect_ff(abs_line: str, ff_paths: dict,
     return ff_paths, ff_dirs
 
 
-def collect_abs_paths(line: str) -> str:
+def collect_abs_paths(line: str, p_env: str) -> str:
     """
     Turn the words that have a path into abspath (except for executable).
 
     :param line: command line in list
+    :param p_env: Conda environment to run the job.
     :return: concatenate string into abspath'ed command line
     """
     abs_line = []
+
+    conda_exe =  set()
+    if p_env:
+        conda_path = subprocess.getoutput('conda info --base')
+        conda_exe_paths = glob('%s/envs/%s/bin/*' % (conda_path, p_env))
+        conda_exe = set([basename(exe_path) for exe_path in conda_exe_paths])
+
     for x in line.strip().split():
         if x.startswith('/'):
             abs_line.append(x)
         elif exists(x) or len(glob(x)):
-            print("")
-            print("")
-            print("")
-            print("subprocess.getstatusoutput('which %s')" % x)
-            print(subprocess.getstatusoutput('which %s' % x))
-            if subprocess.getstatusoutput('which %s' % x)[0]:
+            if p_env and x in conda_exe:
+                abs_line.append(x)
+            elif subprocess.getstatusoutput('which %s' % x)[0]:
                 abs_line.append(x)
             else:
                 abs_line.append(abspath(x))
@@ -69,7 +74,7 @@ def collect_abs_paths(line: str) -> str:
 
 
 def get_commands_file(p_scratch_path: str, path: str, commands: list,
-                      ff_paths: dict, ff_dirs: dict) -> (list, dict, dict):
+                      ff_paths: dict, ff_dirs: dict, p_env: str) -> (list, dict, dict):
     """
     Parse the .sh file and collect the actual script commands.
 
@@ -78,6 +83,7 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list,
     :param commands: full list of commands to be appended.
     :param ff_paths: files to move on scratch.
     :param ff_dirs: folders to move on scratch.
+    :param p_env: Conda environment to run the job.
     :return:
         commands    : appended commands list.
         ff_paths    : files to be moved for /localscratch jobs.
@@ -88,7 +94,7 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list,
         # for each command of the script
         for line in f:
             # collect the absolute paths of the files/folders that exist or keep words as are
-            abs_line = collect_abs_paths(line)
+            abs_line = collect_abs_paths(line, p_env)
             # add this command with modified path to abspath as a new command
             commands.append(abs_line)
             # if it is asked to work on a scratch folder
@@ -164,7 +170,7 @@ def parse_command(i_script: str, p_scratch_path: str, p_env: str) -> (list, dict
     if isfile(i_script):
         # get the command from the file content
         commands, ff_paths, ff_dirs = get_commands_file(
-            p_scratch_path, i_script, commands, ff_paths, ff_dirs
+            p_scratch_path, i_script, commands, ff_paths, ff_dirs, p_env
         )
     # if the script file does not exists
     # (-> it could be a command passed directly to the command line)
