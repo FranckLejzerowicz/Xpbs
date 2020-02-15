@@ -57,8 +57,18 @@ def collect_abs_paths(line: str, p_env: str) -> str:
         conda_exe_paths = glob('%s/envs/%s/bin/*' % (conda_path, p_env))
         conda_exe = set([basename(exe_path) for exe_path in conda_exe_paths])
 
-    for x in line.strip().split():
-        if x.startswith('/'):
+    if line.startswith('qiime'):
+        if ' -' in line:
+            qiime_cmd = line[:line.index(' -')]
+            abs_line.append(qiime_cmd)
+            line_qiimed = line[line.index(' -'):]
+        else:
+            return line.strip()
+    else:
+        line_qiimed = line
+
+    for x in line_qiimed.strip().split():
+        if x[0] in ['/', '-']:
             abs_line.append(x)
         elif exists(x) or len(glob(x)):
             if p_env and x in conda_exe:
