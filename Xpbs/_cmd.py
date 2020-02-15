@@ -90,17 +90,23 @@ def collect_abs_paths(line_input: str, p_env: str) -> str:
     conda_exe = get_conda_exes(p_env)
     line, abs_line = get_abs_line_q2init(line_input)
     for x in line.strip().split():
-        if x[0] in ['/', '-']:
-            abs_line.append(x)
-        elif exists(x) or len(glob(x)):
-            if p_env and x in conda_exe:
+        try:
+            if x[0] in ['/', '-']:
                 abs_line.append(x)
-            elif subprocess.getstatusoutput('which %s' % x)[0]:
-                abs_line.append(x)
+            elif exists(x) or len(glob(x)):
+                if p_env and x in conda_exe:
+                    abs_line.append(x)
+                elif subprocess.getstatusoutput('which %s' % x)[0]:
+                    abs_line.append(x)
+                else:
+                    abs_line.append(abspath(x))
             else:
-                abs_line.append(abspath(x))
-        else:
-            abs_line.append(x)
+                abs_line.append(x)
+        except ValueError:
+            print()
+            print("line")
+            print(line)
+            print(fdsa)
     abs_line = ' '.join(abs_line)
     return abs_line
 
