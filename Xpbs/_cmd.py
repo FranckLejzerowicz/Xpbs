@@ -41,33 +41,55 @@ def collect_ff(abs_line: str, ff_paths: dict,
     return ff_paths, ff_dirs
 
 
-def collect_abs_paths(line: str, p_env: str) -> str:
+def get_conda_exes(p_env: str) -> set:
     """
-    Turn the words that have a path into abspath (except for executable).
-
-    :param line: command line in list
+    Get the conda environment path(s)
     :param p_env: Conda environment to run the job.
-    :return: concatenate string into abspath'ed command line
     """
-    abs_line = []
-
     conda_exe =  set()
     if p_env:
         conda_path = subprocess.getoutput('conda info --base')
         conda_exe_paths = glob('%s/envs/%s/bin/*' % (conda_path, p_env))
         conda_exe = set([basename(exe_path) for exe_path in conda_exe_paths])
+    return conda_exe
 
-    if line.startswith('qiime') or line.startswith('echo "qiime'):
-        if ' -' in line:
-            qiime_cmd = line[:line.index(' -')]
-            abs_line.append(qiime_cmd)
-            line_qiimed = line[line.index(' -'):]
+
+def get_abs_line_q2init(line_input: str) -> (str, list):
+    """
+    Return the command without the qiime2 plugin/module call
+    as this must stay unchanged (could be abspath'ed if a folder
+    has a plugin/module name too...)
+
+    :param line_input: native, passed command
+    :return:
+    """
+    abs_line = []
+    line = line_input
+    # make sure a qiime command is not transformed into a abspath by mistake
+    if line_input.startswith('qiime') or line_input.startswith('echo "qiime'):
+        if ' -' in line_input:
+            # keep the line part before first option and the rest to abspath
+            abs_line.append(line_input[:line_input.index(' -')].strip())
+            line = line_input[line_input.index(' -'):]
         else:
-            return line.strip()
-    else:
-        line_qiimed = line
+            # keep the entire line and nothing left to abspath
+            abs_line.append(line_input.strip())
+            line = ''
+    # this may return the line unchanged, and this everything to abspath
+    return line, abs_line
 
-    for x in line_qiimed.strip().split():
+
+def collect_abs_paths(line_input: str, p_env: str) -> str:
+    """
+    Turn the words that have a path into abspath (except for executable).
+
+    :param line_input: command line in list
+    :param p_env: Conda environment to run the job.
+    :return: concatenate string into abspath'ed command line
+    """
+    conda_exe = get_conda_exes(p_env)
+    line, abs_line = get_abs_line_q2init(line_input)
+    for x in line.strip().split():
         if x[0] in ['/', '-']:
             abs_line.append(x)
         elif exists(x) or len(glob(x)):
