@@ -57,7 +57,7 @@ def collect_abs_paths(line: str, p_env: str) -> str:
         conda_exe_paths = glob('%s/envs/%s/bin/*' % (conda_path, p_env))
         conda_exe = set([basename(exe_path) for exe_path in conda_exe_paths])
 
-    if line.startswith('qiime'):
+    if line.startswith('qiime') or line.startswith('echo "qiime'):
         if ' -' in line:
             qiime_cmd = line[:line.index(' -')]
             abs_line.append(qiime_cmd)
