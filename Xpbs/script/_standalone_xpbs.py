@@ -69,6 +69,10 @@ from Xpbs import __version__
 	help="Node names by the number(s), e.g. for brncl-04, enter '4'"
 )
 @click.option(
+	"-c", "--p-chmod", default='775', show_default=True,
+	help="Change permission on all the output files."
+)
+@click.option(
 	"--email/--no-email", default=False, show_default=True,
 	help="Send email at job completion (always if fail)"
 )
@@ -83,10 +87,6 @@ from Xpbs import __version__
 @click.option(
 	"--gpu/--no-gpu", default=False, show_default=True,
 	help="Switch from Torque to Slurm (including querying 1 gpu)"
-)
-@click.option(
-	"-c", "--p-chmod", default='775', show_default=True,
-	help="Change permission on all the output files."
 )
 @click.version_option(__version__, prog_name="Xpbs")
 
