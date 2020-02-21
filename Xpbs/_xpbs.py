@@ -30,7 +30,7 @@ ROOT = pkg_resources.resource_filename("Xpbs", "")
 def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
              p_env: str, p_dir: str, p_nodes: int, p_tmp: str, p_procs: int,
              p_time: str, p_scratch_path: str, p_mem: tuple, p_nodes_names: str,
-             email: bool, run: bool, noq: bool, gpu: bool) -> None:
+             email: bool, run: bool, noq: bool, gpu: bool, chmod: str) -> None:
     """
     Main script to go from (.sh) script to the output file
     :param i_script: Script of command lines to transform to Torque/Slurm job.
@@ -50,6 +50,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     :param run: Run the PBS job before exiting (subprocess).
     :param noq: Do not ask for user-input 'y/n' sanity check.
     :param gpu: Switch from Torque to Slurm (including querying 1 gpu).
+    :param chmod: whether to change permission of output files (defalt: 775).
     :return: torque/slurm script with directives and possibly re-localization of file if working on a scratch folder.
     """
 
@@ -64,7 +65,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
 
     # ff is not empty only if the -l is active
     # (i.e. if user wishes that the job happens on /localscratch file copies)
-    commands, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path, p_env)
+    commands, outputs, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path, p_env)
 
     # pbs directives
     pbs = get_pbs(i_job, o_pbs, p_time, p_queue, p_nodes, p_procs,
@@ -79,7 +80,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     env = get_env(i_job, o_pbs, p_env, p_tmp, work_dir, gpu, p_scratch_path, ff_paths)
 
     # write the psb file to provide to "qsub"
-    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, commands, ff_dirs)
+    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, commands, outputs, ff_dirs, chmod)
     if run:
         print('Launched command: /bin/sh %s' % job_file)
         subprocess.Popen(['qsub', job_file])

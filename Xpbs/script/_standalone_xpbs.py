@@ -84,6 +84,10 @@ from Xpbs import __version__
 	"--gpu/--no-gpu", default=False, show_default=True,
 	help="Switch from Torque to Slurm (including querying 1 gpu)"
 )
+@click.option(
+	"-c", "--p-chmod", default='775', show_default=True,
+	help="Change permission on all the output files."
+)
 @click.version_option(__version__, prog_name="Xpbs")
 
 
@@ -104,7 +108,8 @@ def standalone_xpbs(
 		email,
 		run,
 		noq,
-		gpu
+		gpu,
+		p_chmod
 ):
 
 	run_xpbs(
@@ -124,7 +129,8 @@ def standalone_xpbs(
 		email,
 		run,
 		noq,
-		gpu
+		gpu,
+		p_chmod
 	)
 
 

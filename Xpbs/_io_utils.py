@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: str,
-              gpu: bool, commands: list, ff_dirs: dict) -> None:
+              gpu: bool, commands: list, outputs: list, ff_dirs: dict, chmod: str) -> None:
     """
     Write the actual .pbs / slurm .sh script based on
     the info collected from the command line.
@@ -25,7 +25,9 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
     :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
     :param gpu: whether to run on GPU or not (and hence use Slurm in our case)
     :param commands: commands list.
+    :param outputs: output files to potentially chmod.
     :param ff_dirs: folders to move on scratch.
+    :param chmod: whether to change permission of output files (defalt: 775).
     :return: None
     """
 
@@ -80,6 +82,11 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         else:
             o.write('\nrm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}\n')
             o.write('echo "rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}"\n')
+
+        if chmod:
+            o.write('\n\n')
+            for output in outputs:
+                o.write('chmod %s %s\n' % (chmod, output))
         o.write('echo "Done!"\n')
 
 
