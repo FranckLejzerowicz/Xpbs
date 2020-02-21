@@ -69,7 +69,7 @@ from Xpbs import __version__
 	help="Node names by the number(s), e.g. for brncl-04, enter '4'"
 )
 @click.option(
-	"-c", "--p-chmod", default='775', show_default=True,
+	"-c", "--p-chmod", default=None, show_default=True,
 	help="Change permission on all the output files."
 )
 @click.option(
