@@ -85,7 +85,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
 
         if chmod:
             o.write('\n\n')
-            for output in outputs:
+            for output in set(outputs):
                 o.write('chmod %s %s\n' % (chmod, output))
         o.write('echo "Done!"\n')
 
