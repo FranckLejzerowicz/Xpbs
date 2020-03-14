@@ -37,6 +37,9 @@ Two type of inputs passed to `-i` or `--i-script` are possible:
 1. A path to a file containing bash command line(s) (the file extension needs not to be `.sh`)
 2. Directly a command line (between double quotes, e.g. `-i "tar xpfz archive.tar.gz"`) 
 
+It might be of great importance for you to use the option `-e` to give the name of 
+a conda environment within which you have installed a software that the job will use.  
+
 ## Outputs
 
 A _Torque_'s or _Slurm_'s script (if GPU are queried), including directives for resources querying (the file extension shall be .pbs).
@@ -74,16 +77,16 @@ Options:
   -n, --p-nodes INTEGER           Number of nodes  [default: 1]
   -T, --p-tmp TEXT                Alternative temp folder to the one defined
                                   in $TMPDIR
-  -p, --p-procs INTEGER           Number of processors  [default: 4]
+  -p, --p-procs INTEGER           Number of processors  [default: 1]
   -t, --p-time TEXT               Walltime limit (1 integers: hours)
                                   [default: 10]
   -l, --p-scratch-path TEXT       Folder for moving files and computing in
                                   (default = do not move to
                                   scratch).ATTENTION: must be an absolute path
                                   (i.e. starting with '/')  [default: False]
-  -M, --p-mem TEXT...             Expected memory usage (2 entries: (1) an
-                                  integer, (2) one of ['b', 'kb', 'mb', 'gb'])
-                                  [default: 1, gb]
+  -M, --p-mem TEXT...             Expected memory usage needs two entries: (1) an
+                                  integer, (2) one of 'b', 'kb', 'mb', 'gb'
+                                  (default: 1 gb).
   -N, --p-nodes-names [0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54]
                                   Node names by the number(s), e.g. for
                                   brncl-04, enter '4'

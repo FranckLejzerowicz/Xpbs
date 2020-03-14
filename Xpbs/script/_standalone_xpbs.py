@@ -45,7 +45,7 @@ from Xpbs import __version__
 	help="Alternative temp folder to the one defined in $TMPDIR"
 )
 @click.option(
-	"-p", "--p-procs", required=False, default=4, type=int,
+	"-p", "--p-procs", required=False, default=1, type=int,
 	help="Number of processors", show_default=True
 )
 @click.option(
@@ -59,9 +59,9 @@ from Xpbs import __version__
 		 "ATTENTION: must be an absolute path (i.e. starting with '/')"
 )
 @click.option(
-	"-M", "--p-mem", required=False, nargs=2,
-	default=["1", "gb"], show_default=True,
-	help="Expected memory usage (2 entries: (1) an integer, (2) one of ['b', 'kb', 'mb', 'gb'])"
+	"-M", "--p-mem", required=False, nargs=2, show_default=False,
+	help="Expected memory usage needs two entries separated by a space: "
+		 "(1) an integer and (2) one of 'b', 'kb', 'mb', 'gb'. (Default: '1 gb')"
 )
 @click.option(
 	"-N", "--p-nodes-names", required=False, default=None,
