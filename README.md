@@ -4,10 +4,16 @@ Convert of .sh script into Torque's .pbs or Slurm's script for use on a computer
 
 ## Description
 
-Working on computer cluster necessitates the querying of nodes, processors-per-node and memory resources that is conveniently done using directives in a script for job schedulers such as Torque or Slurm.
-This script allows a user to pass a bash/sh script (e.g. a series of qiime2 commands) and returns a copy of the script within
-From the user is only needed (1) email address and (2) path to a temporary folder
-(email address is to get notifications when a job crashes/completes... and for nothing else!)
+Working on computer cluster necessitates the querying of nodes, 
+processors-per-node and memory resources that is conveniently 
+done using directives in a script for job schedulers such 
+as [Torque](http://docs.adaptivecomputing.com/torque/4-0-2/help.htm) 
+or [Slurm](https://slurm.schedmd.com/documentation.html).
+This script allows a user to pass a bash/sh script (e.g. a series of 
+qiime2 commands) and returns a copy of the script within
+From the user is only needed (1) email address and (2) path to a 
+temporary folder (email address is to get notifications when a job 
+crashes/completes... and for nothing else!)
      
  # Install
 
