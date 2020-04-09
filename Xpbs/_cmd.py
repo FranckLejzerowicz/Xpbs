@@ -66,7 +66,7 @@ def get_abs_line_q2init(line_input: str) -> (str, list):
     abs_line = []
     line = line_input
     # make sure a qiime command is not transformed into a abspath by mistake
-    if line_input.startswith('qiime') or line_input.startswith('echo "qiime'):
+    if line_input.startswith('qiime ') or line_input.startswith('echo "qiime '):
         if ' -' in line_input:
             # keep the line part before first option and the rest to abspath
             abs_line.append(line_input[:line_input.index(' -')].strip())
