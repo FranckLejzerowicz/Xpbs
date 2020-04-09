@@ -27,7 +27,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
     :param commands: commands list.
     :param outputs: output files to potentially chmod.
     :param ff_dirs: folders to move on scratch.
-    :param chmod: whether to change permission of output files (defalt: 775).
+    :param chmod: whether to change permission of output files (default: no).
     :return: None
     """
 
@@ -84,9 +84,12 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             o.write('echo "rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}"\n')
 
         if chmod:
-            o.write('\n\n')
-            for output in set(outputs):
-                o.write('chmod %s %s\n' % (chmod, output))
+            if len(chmod) != len([x for x in chmod if x.isdigit() and int(x) < 8]):
+                print('Problem with the entered chmod "%s"\nIgnoring' % chmod)
+            else:
+                o.write('\n\n')
+                for output in set(outputs):
+                    o.write('chmod %s %s\n' % (chmod, output))
         o.write('echo "Done!"\n')
 
 

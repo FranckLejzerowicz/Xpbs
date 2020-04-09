@@ -50,7 +50,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     :param run: Run the PBS job before exiting (subprocess).
     :param noq: Do not ask for user-input 'y/n' sanity check.
     :param gpu: Switch from Torque to Slurm (including querying 1 gpu).
-    :param chmod: whether to change permission of output files (defalt: 775).
+    :param chmod: whether to change permission of output files (default: no).
     :return: torque/slurm script with directives and possibly re-localization of file if working on a scratch folder.
     """
 

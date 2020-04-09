@@ -54,9 +54,9 @@ from Xpbs import __version__
 	help="Walltime limit (1 integers: hours)"
 )
 @click.option(
-	"-l", "--p-scratch-path", default=False, show_default=True,
-	help="Folder for moving files and computing in (default = do not move to scratch)."
-		 "ATTENTION: must be an absolute path (i.e. starting with '/')"
+	"-l", "--p-scratch-path", show_default=True,
+	default='/panfs/panfs1.ucsd.edu/panscratch/$HOME',
+	help="panasas scratch folder for moving files and computing "
 )
 @click.option(
 	"-M", "--p-mem", required=False, nargs=2, show_default=False,
@@ -70,7 +70,8 @@ from Xpbs import __version__
 )
 @click.option(
 	"-c", "--p-chmod", default=None, show_default=True,
-	help="Change permission on all the output files."
+	help="Change permission on all the output "
+		 "files (enter a 3 digit code)."
 )
 @click.option(
 	"--email/--no-email", default=False, show_default=True,
