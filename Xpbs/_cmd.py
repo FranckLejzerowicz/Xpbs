@@ -35,7 +35,7 @@ def collect_ff(abs_line: str, ff_paths: dict,
             ff_paths[abs_i_s] = '${locdir}%s' % abs_i_s
             ff_dirs[abs_d] = '${locdir}%s' % dirname(abs_i_s)
         # get only local -> scratch folder paths mapping for root based folders
-        elif abs_i_s[0] == '/':
+        elif len(abs_i_s) > 1 and abs_i_s[0] == '/':
             abs_d = dirname(abs_i_s)
             ff_dirs[abs_d] = '${locdir}%s' % dirname(abs_i_s)
     return ff_paths, ff_dirs
@@ -206,6 +206,7 @@ def parse_command(i_script: str, p_scratch_path: str, p_env: str) -> (list, dict
     outputs = []
     # if the script file exists
     if isfile(i_script):
+        print(i_script)
         # get the command from the file content
         commands, outputs, ff_paths, ff_dirs = get_commands_file(
             p_scratch_path, i_script, commands, outputs, ff_paths, ff_dirs, p_env
