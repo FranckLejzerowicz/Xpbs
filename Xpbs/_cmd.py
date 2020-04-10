@@ -206,7 +206,6 @@ def parse_command(i_script: str, p_scratch_path: str, p_env: str) -> (list, dict
     outputs = []
     # if the script file exists
     if isfile(i_script):
-        print(i_script)
         # get the command from the file content
         commands, outputs, ff_paths, ff_dirs = get_commands_file(
             p_scratch_path, i_script, commands, outputs, ff_paths, ff_dirs, p_env
