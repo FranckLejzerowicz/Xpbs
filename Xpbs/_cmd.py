@@ -9,11 +9,11 @@
 import sys
 import subprocess
 from glob import glob
-from os.path import abspath, dirname, exists, isfile, basename
+from os.path import abspath, dirname, exists, isdir, isfile, basename
 
 
-def collect_ff(abs_line: str, ff_paths: dict,
-               ff_dirs: dict) -> (dict, dict):
+def collect_ff(abs_line: str, ff_paths: set,
+               ff_dirs: set) -> (set, set):
     """
     This function is run when the -l options is ON
     It will copy all the files that the job works on into
@@ -30,14 +30,13 @@ def collect_ff(abs_line: str, ff_paths: dict,
         # re-strip the possible quotes in file names
         abs_i_s = abs_i.strip('"').strip("'")
         # get the local -> scratch paths mapping of existing files/folders
-        if exists(abs_i_s):
-            abs_d = dirname(abs_i_s)
-            ff_paths[abs_i_s] = '${locdir}%s' % abs_i_s
-            ff_dirs[abs_d] = '${locdir}%s' % dirname(abs_i_s)
+        if isdir(abs_i_s):
+            ff_dirs.add(abs_i_s)
+        elif isfile(abs_i_s):
+            ff_paths.add(abs_i_s)
         # get only local -> scratch folder paths mapping for root based folders
         elif len(abs_i_s) > 1 and abs_i_s[0] == '/':
-            abs_d = dirname(abs_i_s)
-            ff_dirs[abs_d] = '${locdir}%s' % dirname(abs_i_s)
+            ff_dirs.add(dirname(abs_i_s))
     return ff_paths, ff_dirs
 
 
@@ -110,7 +109,7 @@ def collect_abs_paths(line_input: str, p_env: str, outputs: list) -> str:
 
 
 def get_commands_file(p_scratch_path: str, path: str, commands: list, outputs: list,
-                      ff_paths: dict, ff_dirs: dict, p_env: str) -> (list, dict, dict):
+                      ff_paths: set, ff_dirs: set, p_env: str) -> (list, list, set, set):
     """
     Parse the .sh file and collect the actual script commands.
 
@@ -148,8 +147,8 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list, outputs: l
     return commands, outputs, ff_paths, ff_dirs
 
 
-def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: dict,
-                      ff_dirs: dict) -> (list, dict, dict):
+def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: set,
+                      ff_dirs: set) -> (list, dict, dict):
     """
     ########################
     ## NOT USED CURRENTLY ##
@@ -187,7 +186,7 @@ def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: dict,
     return commands, ff_paths, ff_dirs
 
 
-def parse_command(i_script: str, p_scratch_path: str, p_env: str) -> (list, dict, dict):
+def parse_command(i_script: str, p_scratch_path: str, p_env: str) -> (list, list, set, set):
     """
     Main interpreter of the passed scripts / command to the -i option.
 
@@ -200,10 +199,10 @@ def parse_command(i_script: str, p_scratch_path: str, p_env: str) -> (list, dict
         ff_paths    : files to be moved for /localscratch jobs.
         ff_dirs     : folders to be moved for /localscratch jobs.
     """
-    ff_dirs = {}
-    ff_paths = {}
     commands = []
     outputs = []
+    ff_paths = set()
+    ff_dirs = set()
     # if the script file exists
     if isfile(i_script):
         # get the command from the file content

@@ -10,7 +10,7 @@ from os.path import abspath, dirname, exists
 
 
 def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
-            gpu: bool, p_scratch_path: str, ff_paths: dict) -> list:
+            gpu: bool, p_scratch_path: str, ff_paths: set, ff_dirs: set) -> list:
     """
     Get the lines to be written as header to the job
     Including:
@@ -24,7 +24,8 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
     :param work_dir: Output directory.
     :param gpu: whether to run on GPU or not (and hence use Slurm in our case).
     :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
-    :param ff_paths: local -> scratch file paths to be updated.
+    :param ff_paths: files to be moved for /localscratch jobs.
+    :param ff_dirs: folders to be moved for /localscratch jobs.
     :return: the commands for the compute environment.
     """
     # environment variables get collected / printed
@@ -87,18 +88,22 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
     # if running on /localscratch
     if p_scratch_path:
         # get the output directory for the job
-        if exists(work_dir) and work_dir != '.':
-            locdir = '%s/%s_${%s}/%s' % (p_scratch_path, i_job, job_id, work_dir.strip('/'))
-        else:
-            locdir = '%s/%s_${%s}' % (p_scratch_path, i_job, job_id)
+        # if exists(work_dir) and work_dir != '.':
+        #     locdir = '%s/%s_${%s}/%s' % (p_scratch_path, i_job, job_id, work_dir.strip('/'))
+        # else:
+        locdir = '%s/%s_${%s}' % (p_scratch_path, i_job, job_id)
         env.append('locdir=%s' % locdir)
         # create fresh folder
         env.append('rm -rf ${locdir}')
         env.append('mkdir -p ${locdir}')
         env.append('cd ${locdir}')
-        for f_home in sorted(ff_paths):
-            # env.append('rsync -aq %s ${locdir}' % f_home)
-            env.append('cp -r --parents %s ${locdir}' % f_home)
+
+        copied_dirs = set([x for x in sorted(ff_dirs) for y in sorted(ff_dirs) if x not in y])
+        for ff in sorted(ff_dirs):
+            if ff not in copied_dirs:
+                env.append('cp -r --parents %s ${locdir}' % ff)
+        for ff in ff_paths:
+            env.append('cp -r --parents %s ${locdir}' % ff)
         env.append('echo Working directory is ${locdir}')
     else:
         ### Switch to working directory; default is home directory.

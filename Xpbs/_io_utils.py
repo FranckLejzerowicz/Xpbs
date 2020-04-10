@@ -49,8 +49,8 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
 
         # if running on scratch, write commands to make directory for moved files/folders
         if p_scratch_path:
-            for f_home, f_loc in ff_dirs.items():
-                o.write('mkdir -p %s\n' % f_loc)
+            for ff in ff_dirs:
+                o.write('mkdir -p ${locdir}%s\n' % ff)
             o.write('\n')
             o.write('\n')
 
@@ -58,17 +58,17 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         for command in commands:
             # if running on scratch, including the actual files/folders moves
             if p_scratch_path:
-                for f_home, f_loc in ff_dirs.items():
-                    if f_home in command:
-                        command = command.replace(f_home, f_loc)
+                for ff in ff_dirs:
+                    if ff in command:
+                        command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
             o.write('%s\n' % command)
         o.write('\n')
         o.write('\n')
 
         # if running on scratch, write commands that move files back
         if p_scratch_path:
-            for f_home, f_loc in ff_dirs.items():
-                o.write('rsync -auq %s/ %s\n' % (f_loc, f_home))
+            for ff in ff_dirs:
+                o.write('rsync -auq ${locdir}%s/ %s\n' % (ff, ff))
             if gpu:
                 o.write('cd $SLURM_SUBMIT_DIR\n')
             else:
