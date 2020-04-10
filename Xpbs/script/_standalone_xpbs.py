@@ -55,7 +55,7 @@ from Xpbs import __version__
 )
 @click.option(
 	"-l", "--p-scratch-path", show_default=True,
-	default='/panfs/panfs1.ucsd.edu/panscratch/${HOME}',
+	default='/panfs/panfs1.ucsd.edu/panscratch/${USER}',
 	help="panasas scratch folder for moving files and computing "
 )
 @click.option(
