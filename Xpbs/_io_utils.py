@@ -71,8 +71,10 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
 
         # if running on scratch, write commands that move files back
         if p_scratch_path:
-            for ff in ff_dirs:
-                o.write('rsync -auq ${locdir}%s/ %s\n' % (ff, ff))
+            copied_dirs = set([x for x in sorted(ff_dirs) for y in sorted(ff_dirs) if x not in y])
+            for ff in sorted(ff_dirs):
+                if ff not in copied_dirs:
+                    o.write('if [-d ${locdir}%s/]; then; rsync -auq ${locdir}%s/ %s; fi\n' % (ff, ff, ff))
             if gpu:
                 o.write('cd $SLURM_SUBMIT_DIR\n')
             else:
@@ -82,10 +84,8 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         # write command to cleanse the temporary folder
         if gpu:
             o.write('\nrm -fr $TMPDIR/%s_${SLURM_JOB_ID}\n' % i_job)
-            o.write('echo "rm -fr $TMPDIR/%s_${SLURM_JOB_ID}"\n' % i_job)
         else:
             o.write('\nrm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBID}\n')
-            o.write('echo "rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBID}"\n')
 
         if chmod:
             if len(chmod) != len([x for x in chmod if x.isdigit() and int(x) < 8]):
