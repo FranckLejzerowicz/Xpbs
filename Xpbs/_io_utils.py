@@ -89,7 +89,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             else:
                 o.write('\n\n')
                 for output in set(outputs):
-                    o.write('if [-f %s]; then; chmod %s %s: fi\n' % (output, chmod, output))
+                    o.write('if [-f %s]; then; chmod %s %s; fi\n' % (output, chmod, output))
         o.write('echo "Done!"\n')
 
 
