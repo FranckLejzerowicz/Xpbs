@@ -48,7 +48,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
         job_procs = 'SLURM_NPROCS'
         job_nodes = 'SLURM_NNODES'
     else:
-        job_id = 'PBS_JOBNUM'
+        job_id = 'PBS_JOBID'
         job_dir = 'PBS_O_WORKDIR'
         job_procs = 'NPROCS'
         job_nodes = 'NNODES'

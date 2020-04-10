@@ -84,8 +84,8 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             o.write('\nrm -fr $TMPDIR/%s_${SLURM_JOB_ID}\n' % i_job)
             o.write('echo "rm -fr $TMPDIR/%s_${SLURM_JOB_ID}"\n' % i_job)
         else:
-            o.write('\nrm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}\n')
-            o.write('echo "rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBNUM}"\n')
+            o.write('\nrm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBID}\n')
+            o.write('echo "rm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBID}"\n')
 
         if chmod:
             if len(chmod) != len([x for x in chmod if x.isdigit() and int(x) < 8]):
