@@ -74,7 +74,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             copied_dirs = set([x for x in sorted(ff_dirs) for y in sorted(ff_dirs) if x not in y])
             for ff in sorted(ff_dirs):
                 if ff not in copied_dirs:
-                    o.write('if [-d ${locdir}%s/]; then; rsync -auq ${locdir}%s/ %s; fi\n' % (ff, ff, ff))
+                    o.write('if [-d ${locdir}%s/]; then rsync -auq ${locdir}%s/ %s; fi\n' % (ff, ff, ff))
             if gpu:
                 o.write('cd $SLURM_SUBMIT_DIR\n')
             else:
@@ -93,7 +93,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             else:
                 o.write('\n\n')
                 for output in set(outputs):
-                    o.write('if [-f %s]; then; chmod %s %s; fi\n' % (output, chmod, output))
+                    o.write('if [-f %s]; then chmod %s %s; fi\n' % (output, chmod, output))
         o.write('echo "Done!"\n')
 
 
