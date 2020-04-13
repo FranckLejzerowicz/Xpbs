@@ -51,7 +51,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         # if running on scratch, write commands to make directory for moved files/folders
         if p_scratch_path:
             for ff in ff_dirs:
-                o.write('mkdir -p ${locdir}%s\n' % ff)
+                o.write('mkdir -p ${locdir}/%s\n' % ff)
             o.write('\n')
             o.write('\n')
 
@@ -61,10 +61,10 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             if p_scratch_path:
                 for ff in ff_dirs:
                     if ff in command:
-                        command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
+                        command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
             for ff in ff_paths:
                 if ff in command:
-                    command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
+                    command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
             o.write('%s\n' % command)
         o.write('\n')
         o.write('\n')
@@ -74,7 +74,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             copied_dirs = set([x for x in sorted(ff_dirs) for y in sorted(ff_dirs) if x not in y])
             for ff in sorted(ff_dirs):
                 if ff not in copied_dirs:
-                    o.write('if [ -d ${locdir}%s/ ]; then rsync -auq ${locdir}%s/ %s; fi\n' % (ff, ff, ff))
+                    o.write('if [ -d ${locdir}/%s/ ]; then rsync -auq ${locdir}/%s/ %s; fi\n' % (ff, ff, ff))
             if gpu:
                 o.write('cd $SLURM_SUBMIT_DIR\n')
             else:
