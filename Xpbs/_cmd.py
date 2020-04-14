@@ -93,8 +93,12 @@ def collect_abs_paths(line_input: str, p_env: str, outputs: list) -> str:
         if x[0] in ['/', '-']:
             abs_line.append(x)
             if x[0] == '/' and not isfile(x):
+                if x == '/projects/nutrition/qemistree/AGP_3k_a/qemistree/feature-data-classyfire.qza':
+                    print('1', abspath(x))
                 outputs.append(abspath(x))
         elif exists(x) or len(glob(x)):
+            if x == '/projects/nutrition/qemistree/AGP_3k_a/qemistree/feature-data-classyfire.qza':
+                print('2')
             print(x)
             print(glob(x))
             print(exists(x))
@@ -152,6 +156,13 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list, outputs: l
                 ff_paths, ff_dirs = collect_ff(
                     abs_line, ff_paths, ff_dirs
                 )
+    print("ff_dirs")
+    print(ff_dirs)
+    print("ff_paths")
+    print(ff_paths)
+    print("outputs")
+    print(outputs)
+    print(ff_pathsfd)
     return commands, outputs, ff_paths, ff_dirs
 
 
