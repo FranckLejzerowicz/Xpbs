@@ -103,7 +103,7 @@ def collect_abs_paths(line_input: str, p_env: str, outputs: list) -> str:
                 abs_line.append(x)
             else:
                 which_out = subprocess.getstatusoutput('which %s' % x)
-                if which_out[0] and 'no %s in' % x not in which_out:
+                if which_out[0] and 'no %s in' % x not in which_out[1]:
                     print('B')
                     abs_line.append(x)
                 else:
