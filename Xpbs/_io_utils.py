@@ -61,18 +61,22 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         for command in commands:
             # if running on scratch, including the actual files/folders moves
             if p_scratch_path:
+                print("ff_dirs")
+                print(ff_dirs)
                 for ff in ff_dirs:
                     if ff in command:
                         if ff[0] == '/':
                             command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
                         else:
                             command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
-            for ff in ff_paths:
-                if ff in command:
-                    if ff[0] == '/':
-                        command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
-                    else:
-                        command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
+                print("ff_paths")
+                print(ff_paths)
+                for ff in ff_paths:
+                    if ff in command:
+                        if ff[0] == '/':
+                            command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
+                        else:
+                            command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
             o.write('%s\n' % command)
         o.write('\n')
         o.write('\n')
