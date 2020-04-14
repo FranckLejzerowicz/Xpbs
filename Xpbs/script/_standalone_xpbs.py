@@ -59,7 +59,7 @@ from Xpbs import __version__
 	help="panasas scratch folder for moving files and computing "
 )
 @click.option(
-	"-M", "--p-mem", required=False, nargs=2, show_default=False,
+	"-M", "--p-mem", required=False, nargs=2, show_default=False, default=('1', 'gb'),
 	help="Expected memory usage needs two entries separated by a space: "
 		 "(1) an integer and (2) one of 'b', 'kb', 'mb', 'gb'. (Default: '1 gb')"
 )
