@@ -93,25 +93,15 @@ def collect_abs_paths(line_input: str, p_env: str, outputs: list) -> str:
         if x[0] in ['/', '-']:
             abs_line.append(x)
             if x[0] == '/' and not isfile(x):
-                if x == '/projects/nutrition/qemistree/AGP_3k_a/qemistree/feature-data-classyfire.qza':
-                    print('1', abspath(x))
                 outputs.append(abspath(x))
         elif exists(x) or len(glob(x)):
-            if x == '/projects/nutrition/qemistree/AGP_3k_a/qemistree/feature-data-classyfire.qza':
-                print('2')
-            print(x)
-            print(glob(x))
-            print(exists(x))
             if p_env and x in conda_exe:
-                print('A')
                 abs_line.append(x)
             else:
                 which_out = subprocess.getstatusoutput('which %s' % x)
                 if which_out[0] and 'no %s in' % x not in which_out[1]:
-                    print('B')
                     abs_line.append(x)
                 else:
-                    print('C')
                     abs_line.append(abspath(x))
                     outputs.append(abspath(x))
         else:

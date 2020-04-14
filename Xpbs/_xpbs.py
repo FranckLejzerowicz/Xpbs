@@ -81,6 +81,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     env = get_env(i_job, o_pbs, p_env, p_tmp, work_dir, gpu, p_scratch_path, ff_paths, ff_dirs)
 
     # write the psb file to provide to "qsub"
+    print(outputs)
     write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, commands, outputs, ff_paths, ff_dirs, rm, chmod)
     if run:
         print('Launched command: /bin/sh %s' % job_file)
