@@ -146,13 +146,6 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list, outputs: l
                 ff_paths, ff_dirs = collect_ff(
                     abs_line, ff_paths, ff_dirs
                 )
-    print("ff_dirs")
-    print(ff_dirs)
-    print("ff_paths")
-    print(ff_paths)
-    print("outputs")
-    print(outputs)
-    print(ff_pathsfd)
     return commands, outputs, ff_paths, ff_dirs
 
 
