@@ -30,7 +30,7 @@ ROOT = pkg_resources.resource_filename("Xpbs", "")
 def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
              p_env: str, p_dir: str, p_nodes: int, p_tmp: str, p_procs: int,
              p_time: str, p_scratch_path: str, p_mem: tuple, p_nodes_names: str,
-             email: bool, run: bool, noq: bool, gpu: bool, chmod: str) -> None:
+             email: bool, run: bool, noq: bool, gpu: bool, rm: bool, chmod: str) -> None:
     """
     Main script to go from (.sh) script to the output file
     :param i_script: Script of command lines to transform to Torque/Slurm job.
@@ -51,6 +51,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     :param noq: Do not ask for user-input 'y/n' sanity check.
     :param gpu: Switch from Torque to Slurm (including querying 1 gpu).
     :param chmod: whether to change permission of output files (default: no).
+    :param rm: whether to remove the job's temporary and panfs/scratch files or not.
     :return: torque/slurm script with directives and possibly re-localization of file if working on a scratch folder.
     """
 
@@ -80,7 +81,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     env = get_env(i_job, o_pbs, p_env, p_tmp, work_dir, gpu, p_scratch_path, ff_paths, ff_dirs)
 
     # write the psb file to provide to "qsub"
-    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, commands, outputs, ff_paths, ff_dirs, chmod)
+    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, commands, outputs, ff_paths, ff_dirs, rm, chmod)
     if run:
         print('Launched command: /bin/sh %s' % job_file)
         subprocess.Popen(['qsub', job_file])

@@ -89,6 +89,10 @@ from Xpbs import __version__
 	"--gpu/--no-gpu", default=False, show_default=True,
 	help="Switch from Torque to Slurm (including querying 1 gpu)"
 )
+@click.option(
+	"--rm/--no-rm", default=True, show_default=True,
+	help="Remove the job's temporary and panfs/scratch files."
+)
 @click.version_option(__version__, prog_name="Xpbs")
 
 
@@ -110,6 +114,7 @@ def standalone_xpbs(
 		run,
 		noq,
 		gpu,
+		rm,
 		p_chmod
 ):
 
@@ -131,6 +136,7 @@ def standalone_xpbs(
 		run,
 		noq,
 		gpu,
+		rm,
 		p_chmod
 	)
 

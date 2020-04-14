@@ -13,7 +13,8 @@ from pathlib import Path
 
 
 def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: str,
-              gpu: bool, commands: list, outputs: list, ff_paths: set, ff_dirs: set, chmod: str) -> None:
+              gpu: bool, commands: list, outputs: list, ff_paths: set,
+              ff_dirs: set, rm: bool, chmod: str) -> None:
     """
     Write the actual .pbs / slurm .sh script based on
     the info collected from the command line.
@@ -29,6 +30,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
     :param ff_paths: files to be moved for /localscratch jobs.
     :param ff_dirs: folders to move on scratch.
     :param chmod: whether to change permission of output files (default: no).
+    :param rm: whether to remove the job's temporary and panfs/scratch files or not.
     :return: None
     """
 
@@ -51,7 +53,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         # if running on scratch, write commands to make directory for moved files/folders
         if p_scratch_path:
             for ff in ff_dirs:
-                o.write('mkdir -p ${locdir}/%s\n' % ff)
+                o.write('mkdir -p ${locdir}%s\n' % ff)
             o.write('\n')
             o.write('\n')
 
@@ -61,10 +63,16 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             if p_scratch_path:
                 for ff in ff_dirs:
                     if ff in command:
-                        command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
+                        if ff[0] == '/':
+                            command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
+                        else:
+                            command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
             for ff in ff_paths:
                 if ff in command:
-                    command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
+                    if ff[0] == '/':
+                        command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
+                    else:
+                        command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
             o.write('%s\n' % command)
         o.write('\n')
         o.write('\n')
@@ -74,18 +82,30 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             copied_dirs = set([x for x in sorted(ff_dirs) for y in sorted(ff_dirs) if x not in y])
             for ff in sorted(ff_dirs):
                 if ff not in copied_dirs:
-                    o.write('if [ -d ${locdir}/%s/ ]; then rsync -auq ${locdir}/%s/ %s; fi\n' % (ff, ff, ff))
+                    if ff[0] == '/':
+                        o.write('if [ -d ${locdir}%s/ ]; then rsync -auq ${locdir}%s/ %s; fi\n' % (ff, ff, ff))
+                    else:
+                        o.write('if [ -d ${locdir}/%s/ ]; then rsync -auq ${locdir}/%s/ %s; fi\n' % (ff, ff, ff))
+            copied_files = set([x for x in sorted(ff_paths) for y in sorted(ff_paths) if x not in y])
+            for ff in sorted(ff_paths):
+                if ff not in copied_files:
+                    if ff[0] == '/':
+                        o.write('if [ -f ${locdir}%s/ ]; then rsync -auq ${locdir}%s %s; fi\n' % (ff, ff, ff))
+                    else:
+                        o.write('if [ -f ${locdir}/%s/ ]; then rsync -auq ${locdir}/%s %s; fi\n' % (ff, ff, ff))
             if gpu:
                 o.write('cd $SLURM_SUBMIT_DIR\n')
             else:
                 o.write('cd $PBS_O_WORKDIR\n')
-            o.write('rm -rf ${locdir}\n')
+            if rm:
+                o.write('rm -rf ${locdir}\n')
 
         # write command to cleanse the temporary folder
-        if gpu:
-            o.write('\nrm -fr $TMPDIR/%s_${SLURM_JOB_ID}\n' % i_job)
-        else:
-            o.write('\nrm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBID}\n')
+        if rm:
+            if gpu:
+                o.write('\nrm -fr $TMPDIR/%s_${SLURM_JOB_ID}\n' % i_job)
+            else:
+                o.write('\nrm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBID}\n')
 
         if chmod:
             if len(chmod) != len([x for x in chmod if x.isdigit() and int(x) < 8]):
