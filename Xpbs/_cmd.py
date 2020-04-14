@@ -101,13 +101,15 @@ def collect_abs_paths(line_input: str, p_env: str, outputs: list) -> str:
             if p_env and x in conda_exe:
                 print('A')
                 abs_line.append(x)
-            elif subprocess.getstatusoutput('which %s' % x)[0]:
-                print('B')
-                abs_line.append(x)
             else:
-                print('C')
-                abs_line.append(abspath(x))
-                outputs.append(abspath(x))
+                which_out = subprocess.getstatusoutput('which %s' % x)
+                if which_out[0] and 'no %s in' % x not in which_out:
+                    print('B')
+                    abs_line.append(x)
+                else:
+                    print('C')
+                    abs_line.append(abspath(x))
+                    outputs.append(abspath(x))
         else:
             abs_line.append(x)
     abs_line = ' '.join(abs_line)
