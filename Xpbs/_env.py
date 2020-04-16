@@ -107,9 +107,9 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
         copied_dirs = set([x for x in sorted(ff_dirs) for y in sorted(ff_dirs) if x not in y])
         for ff in sorted(ff_dirs):
             if ff not in copied_dirs:
-                env.append('cp -r --parents %s ${locdir} 2> ${jobstderr}' % ff)
+                env.append('cp -r --parents %s ${locdir} 2>> ${jobstderr}' % ff)
         for ff in ff_paths:
-            env.append('cp -r --parents %s ${locdir} 2> ${jobstderr}' % ff)
+            env.append('cp -r --parents %s ${locdir} 2>> ${jobstderr}' % ff)
         env.append('echo Working directory is ${locdir}')
     else:
         ### Switch to working directory; default is home directory.
