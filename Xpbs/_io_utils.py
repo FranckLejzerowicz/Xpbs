@@ -83,9 +83,9 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
             for ff in sorted(ff_dirs):
                 if ff not in copied_dirs:
                     if ff[0] == '/':
-                        o.write('if [ -d ${locdir}%s/ ]; then rsync -auq ${locdir}%s/ %s; fi\n' % (ff, ff, ff))
+                        o.write('if [ -d ${locdir}%s/ ]; then rsync -auq ${locdir}%s %s; fi\n' % (ff, ff, ff))
                     else:
-                        o.write('if [ -d ${locdir}/%s/ ]; then rsync -auq ${locdir}/%s/ %s; fi\n' % (ff, ff, ff))
+                        o.write('if [ -d ${locdir}/%s/ ]; then rsync -auq ${locdir}/%s %s; fi\n' % (ff, ff, ff))
             for ff in set(outputs):
                 if ff[0] == '/':
                     o.write('if [ -f ${locdir}%s/ ]; then rsync -auq ${locdir}%s %s; fi\n' % (ff, ff, ff))
