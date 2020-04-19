@@ -81,18 +81,15 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
     if gpu:
         env.append('jobstdout="%s/%s_${%s}_slurm.o"' % (out_dir, i_job, job_id))
         env.append('jobstderr="%s/%s_${%s}_slurm.e"' % (out_dir, i_job, job_id))
-        env.append('jobstderr2="%s/%s_${%s}_slurm.er"' % (out_dir, i_job, job_id))
         # env.append('echo "%s/%s_${%s}_slurm.o"' % (out_dir, i_job, job_id))
         # env.append('echo "%s/%s_${%s}_slurm.e"' % (out_dir, i_job, job_id))
     else:
         env.append('jobstdout="%s/%s_${%s}.o"' % (out_dir, i_job, job_id))
         env.append('jobstderr="%s/%s_${%s}.e"' % (out_dir, i_job, job_id))
-        env.append('jobstderr2="%s/%s_${%s}.er"' % (out_dir, i_job, job_id))
         # env.append('echo "%s/%s_*.o"' % (out_dir, i_job))
         # env.append('echo "%s/%s_*.e"' % (out_dir, i_job))
     env.append('echo "${jobstdout}"')
     env.append('echo "${jobstderr}"')
-    env.append('echo "${jobstderr2}"')
 
     # if running on /localscratch
     if p_scratch_path:
