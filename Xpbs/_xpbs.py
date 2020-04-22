@@ -16,7 +16,7 @@ from Xpbs._io_utils import (
     get_email_address,
     write_job
 )
-from Xpbs._cmd import parse_command
+from Xpbs._cmd import parse_command, get_conda_exes
 from Xpbs._pbs import get_pbs
 from Xpbs._check import (
     check_command,
@@ -66,7 +66,8 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
 
     # ff is not empty only if the -l is active
     # (i.e. if user wishes that the job happens on /localscratch file copies)
-    commands, outputs, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path, p_env)
+    conda_exe = get_conda_exes(p_env)
+    commands, outputs, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path, p_env, conda_exe)
 
     # pbs directives
     pbs = get_pbs(i_job, o_pbs, p_time, p_queue, p_nodes, p_procs,
