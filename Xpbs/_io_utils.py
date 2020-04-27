@@ -52,7 +52,8 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
 
         # if running on scratch, write commands to make directory for moved files/folders
         if p_scratch_path:
-            for ff in ff_dirs:
+            for ff in set(ff_dirs):
+                o.write('mkdir -p %s\n' % ff)
                 o.write('mkdir -p ${locdir}%s\n' % ff)
             o.write('\n')
             o.write('\n')
