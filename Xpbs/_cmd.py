@@ -33,7 +33,9 @@ def collect_ff(abs_line: str, ff_paths: set,
         if isdir(abs_i_s):
             ff_dirs.add(abs_i_s)
         elif isfile(abs_i_s):
-            ff_paths.add(abs_i_s)
+            which_out = subprocess.getstatusoutput('which %s' % abs_i_s)
+            if not which_out[0]:
+                ff_paths.add(abs_i_s)
         # get only local -> scratch folder paths mapping for root based folders
         elif len(abs_i_s) > 1 and abs_i_s[0] == '/':
             ff_dirs.add(dirname(abs_i_s))
