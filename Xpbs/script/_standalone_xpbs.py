@@ -56,7 +56,7 @@ from Xpbs import __version__
 @click.option(
 	"-l", "--p-scratch-path", show_default=True,
 	default='/panfs/panfs1.ucsd.edu/panscratch/${USER}',
-	help="panasas scratch folder for moving files and computing "
+	help="panasas scratch folder for moving files and computing"
 )
 @click.option(
 	"-M", "--p-mem", required=False, nargs=2, show_default=False, default=('1', 'gb'),
@@ -93,6 +93,10 @@ from Xpbs import __version__
 	"--rm/--no-rm", default=True, show_default=True,
 	help="Remove the job's temporary and panfs/scratch files."
 )
+@click.option(
+	"--loc/--no-loc", default=True, show_default=True,
+	help="Use panasas scratch folder"
+)
 @click.version_option(__version__, prog_name="Xpbs")
 
 
@@ -115,6 +119,7 @@ def standalone_xpbs(
 		noq,
 		gpu,
 		rm,
+		loc,
 		p_chmod
 ):
 
@@ -137,6 +142,7 @@ def standalone_xpbs(
 		noq,
 		gpu,
 		rm,
+		loc,
 		p_chmod
 	)
 

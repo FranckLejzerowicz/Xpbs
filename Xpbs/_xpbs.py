@@ -30,7 +30,8 @@ ROOT = pkg_resources.resource_filename("Xpbs", "")
 def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
              p_env: str, p_dir: str, p_nodes: int, p_tmp: str, p_procs: int,
              p_time: str, p_scratch_path: str, p_mem: tuple, p_nodes_names: str,
-             email: bool, run: bool, noq: bool, gpu: bool, rm: bool, chmod: str) -> None:
+             email: bool, run: bool, noq: bool, gpu: bool, rm: bool,
+             loc: bool, chmod: str) -> None:
     """
     Main script to go from (.sh) script to the output file
     :param i_script: Script of command lines to transform to Torque/Slurm job.
@@ -67,7 +68,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     # ff is not empty only if the -l is active
     # (i.e. if user wishes that the job happens on /localscratch file copies)
     conda_exe = get_conda_exes(p_env)
-    commands, outputs, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path, p_env, conda_exe)
+    commands, outputs, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path, p_env, conda_exe, loc)
 
     # pbs directives
     pbs = get_pbs(i_job, o_pbs, p_time, p_queue, p_nodes, p_procs,
@@ -79,10 +80,11 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
         check_command(job_file, commands)
 
     # set environment and working directory
-    env = get_env(i_job, o_pbs, p_env, p_tmp, work_dir, gpu, p_scratch_path, ff_paths, ff_dirs)
+    env = get_env(i_job, o_pbs, p_env, p_tmp, work_dir, gpu, p_scratch_path, ff_paths, ff_dirs, loc)
 
     # write the psb file to provide to "qsub"
-    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, commands, outputs, ff_paths, ff_dirs, rm, chmod)
+    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu,
+              commands, outputs, ff_paths, ff_dirs, rm, chmod, loc)
     if run:
         print('Launched command: /bin/sh %s' % job_file)
         subprocess.Popen(['qsub', job_file])

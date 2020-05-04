@@ -111,7 +111,7 @@ def collect_abs_paths(line_input: str, p_env: str, conda_exe: set, outputs: list
 
 def get_commands_file(p_scratch_path: str, path: str, commands: list,
                       outputs: list, ff_paths: set, ff_dirs: set,
-                      p_env: str, conda_exe: set) -> (list, list, set, set):
+                      p_env: str, conda_exe: set, loc: bool) -> (list, list, set, set):
     """
     Parse the .sh file and collect the actual script commands.
 
@@ -137,7 +137,7 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list,
             # add this command with modified path to abspath as a new command
             commands.append(abs_line)
             # if it is asked to work on a scratch folder
-            if p_scratch_path:
+            if p_scratch_path and loc:
                 if p_scratch_path[0] != '/':
                     print('scratch folder path must by absolute, i.e. start with "/"'
                           '.. Do you mean "/%s" ?\nExiting...' % p_scratch_path)
@@ -189,7 +189,7 @@ def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: set,
 
 
 def parse_command(i_script: str, p_scratch_path: str, p_env: str,
-                  conda_exe: set) -> (list, list, set, set):
+                  conda_exe: set, loc: bool) -> (list, list, set, set):
     """
     Main interpreter of the passed scripts / command to the -i option.
 
@@ -210,7 +210,7 @@ def parse_command(i_script: str, p_scratch_path: str, p_env: str,
     if isfile(i_script):
         # get the command from the file content
         commands, outputs, ff_paths, ff_dirs = get_commands_file(
-            p_scratch_path, i_script, commands, outputs, ff_paths, ff_dirs, p_env, conda_exe
+            p_scratch_path, i_script, commands, outputs, ff_paths, ff_dirs, p_env, conda_exe, loc
         )
     # if the script file does not exists
     # (-> it could be a command passed directly to the command line)

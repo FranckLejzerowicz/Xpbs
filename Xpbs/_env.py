@@ -10,7 +10,7 @@ from os.path import abspath, dirname, exists
 
 
 def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
-            gpu: bool, p_scratch_path: str, ff_paths: set, ff_dirs: set) -> list:
+            gpu: bool, p_scratch_path: str, ff_paths: set, ff_dirs: set, loc: bool) -> list:
     """
     Get the lines to be written as header to the job
     Including:
@@ -92,7 +92,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
     env.append('echo "${jobstderr}"')
 
     # if running on /localscratch
-    if p_scratch_path:
+    if p_scratch_path and loc:
         # get the output directory for the job
         # if exists(work_dir) and work_dir != '.':
         #     locdir = '%s/%s_${%s}/%s' % (p_scratch_path, i_job, job_id, work_dir.strip('/'))

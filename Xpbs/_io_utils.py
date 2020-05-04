@@ -14,7 +14,7 @@ from pathlib import Path
 
 def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: str,
               gpu: bool, commands: list, outputs: list, ff_paths: set,
-              ff_dirs: set, rm: bool, chmod: str) -> None:
+              ff_dirs: set, rm: bool, chmod: str, loc: bool) -> None:
     """
     Write the actual .pbs / slurm .sh script based on
     the info collected from the command line.
@@ -51,7 +51,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         o.write('\n')
 
         # if running on scratch, write commands to make directory for moved files/folders
-        if p_scratch_path:
+        if p_scratch_path and loc:
             for ff in set(ff_dirs):
                 o.write('mkdir -p %s\n' % ff)
                 o.write('mkdir -p ${locdir}%s\n' % ff)
@@ -61,7 +61,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         # write the actual commands script
         for command in commands:
             # if running on scratch, including the actual files/folders moves
-            if p_scratch_path:
+            if p_scratch_path and loc:
                 for ff in ff_dirs:
                     if ff in command:
                         if ff[0] == '/':
@@ -79,7 +79,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         o.write('\n')
 
         # if running on scratch, write commands that move files back
-        if p_scratch_path:
+        if p_scratch_path and loc:
             copied_dirs = set([x for x in sorted(ff_dirs) for y in sorted(ff_dirs) if x not in y])
             for ff in sorted(ff_dirs):
                 if ff not in copied_dirs:
