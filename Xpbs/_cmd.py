@@ -13,7 +13,7 @@ from os.path import abspath, dirname, exists, isdir, isfile, basename
 
 
 def collect_ff(abs_line: str, ff_paths: set,
-               ff_dirs: set, is_qiime: bool) -> (set, set):
+               ff_dirs: set) -> (set, set):
     """
     This function is run when the -l options is ON
     It will copy all the files that the job works on into
