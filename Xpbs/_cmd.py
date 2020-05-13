@@ -76,6 +76,9 @@ def get_abs_line_q2init(line_input: str) -> (str, list):
             # keep the entire line and nothing left to abspath
             abs_line.append(line_input.strip())
             line = ''
+        print(abs_line)
+        print(line)
+        print(gfds)
     # this may return the line unchanged, and this everything to abspath
     return line, abs_line
 
