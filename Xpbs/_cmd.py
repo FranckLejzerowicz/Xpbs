@@ -13,7 +13,7 @@ from os.path import abspath, dirname, exists, isdir, isfile, basename
 
 
 def collect_ff(abs_line: str, ff_paths: set,
-               ff_dirs: set) -> (set, set):
+               ff_dirs: set, is_qiime: bool) -> (set, set):
     """
     This function is run when the -l options is ON
     It will copy all the files that the job works on into
@@ -26,19 +26,22 @@ def collect_ff(abs_line: str, ff_paths: set,
     :return: ff_paths and ff_dirs updated with new file and folder paths.
     """
     # for each term of the stripped and space-separated command
-    for abs_i in abs_line.strip().split():
-        # re-strip the possible quotes in file names
-        abs_i_s = abs_i.strip('"').strip("'")
-        # get the local -> scratch paths mapping of existing files/folders
-        if isdir(abs_i_s):
-            ff_dirs.add(abs_i_s)
-        elif isfile(abs_i_s):
-            which_out = subprocess.getstatusoutput('which %s' % abs_i_s)
-            if which_out[0]:
-                ff_paths.add(abs_i_s)
-        # get only local -> scratch folder paths mapping for root based folders
-        elif len(abs_i_s) > 1 and abs_i_s[0] == '/':
-            ff_dirs.add(dirname(abs_i_s))
+
+    line, qiime_line = get_abs_line_q2init(abs_line)
+    if not qiime_line:
+        for abs_i in line.strip().split():
+            # re-strip the possible quotes in file names
+            abs_i_s = abs_i.strip('"').strip("'")
+            # get the local -> scratch paths mapping of existing files/folders
+            if isdir(abs_i_s):
+                ff_dirs.add(abs_i_s)
+            elif isfile(abs_i_s):
+                which_out = subprocess.getstatusoutput('which %s' % abs_i_s)
+                if which_out[0]:
+                    ff_paths.add(abs_i_s)
+            # get only local -> scratch folder paths mapping for root based folders
+            elif len(abs_i_s) > 1 and abs_i_s[0] == '/':
+                ff_dirs.add(dirname(abs_i_s))
     return ff_paths, ff_dirs
 
 
@@ -76,14 +79,12 @@ def get_abs_line_q2init(line_input: str) -> (str, list):
             # keep the entire line and nothing left to abspath
             abs_line.append(line_input.strip())
             line = ''
-        print(abs_line)
-        print(line)
-        print(gfds)
     # this may return the line unchanged, and this everything to abspath
     return line, abs_line
 
 
-def collect_abs_paths(line_input: str, p_env: str, conda_exe: set, outputs: list) -> str:
+def collect_abs_paths(line_input: str, p_env: str, conda_exe: set,
+                      outputs: list) -> (str, bool):
     """
     Turn the words that have a path into abspath (except for executable).
 
@@ -93,7 +94,8 @@ def collect_abs_paths(line_input: str, p_env: str, conda_exe: set, outputs: list
     :return: concatenate string into abspath'ed command line
     """
     line, abs_line = get_abs_line_q2init(line_input)
-    for x in line.strip().split():
+    L = line.strip().split()
+    for idx, x in enumerate(L):
         if x[0] in ['/', '-']:
             abs_line.append(x)
             if x[0] == '/' and not isfile(x):
@@ -103,8 +105,11 @@ def collect_abs_paths(line_input: str, p_env: str, conda_exe: set, outputs: list
                 abs_line.append(x)
             else:
                 which_out = subprocess.getstatusoutput('which %s' % x)
+                # cmd_out = subprocess.getstatusoutput('%s --help' % ' '.join(L[:(idx+1)]))
                 if which_out[0] and 'no %s in' % x not in which_out[1]:
                     abs_line.append(x)
+                # elif cmd_out[0] == 0:
+                #     abs_line.append(x)
                 else:
                     abs_line.append(abspath(x))
                     outputs.append(abspath(x))
