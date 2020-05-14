@@ -42,6 +42,7 @@ def collect_ff(abs_line: str, ff_paths: set,
             # get only local -> scratch folder paths mapping for root based folders
             elif len(abs_i_s) > 1 and abs_i_s[0] == '/':
                 ff_dirs.add(dirname(abs_i_s))
+                ff_paths.add(abs_i_s)
     return ff_paths, ff_dirs
 
 
