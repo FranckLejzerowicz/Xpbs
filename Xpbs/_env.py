@@ -37,8 +37,8 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
             # and it is mmvec (specific here... should be deleted at some point!)
             env.append('source /home/flejzerowicz/virtualenv__mmvec/bin/activate')
             env.append('echo "Virtualenv environment is virtualenv__mmvec"')
-            env.append('echo "module load tensorflow_1.14.0"')
-            env.append('module load tensorflow_1.14.0')
+            # env.append('echo "module load tensorflow_1.14.0"')
+            # env.append('module load tensorflow_1.14.0')
         else:
             env.append('echo "Conda environment is %s"' % p_env)
             env.append('source activate %s' % p_env)
