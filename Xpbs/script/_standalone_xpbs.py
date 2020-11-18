@@ -65,7 +65,7 @@ from Xpbs import __version__
 )
 @click.option(
 	"-N", "--p-nodes-names", required=False, default=None,
-	multiple=True, type=click.Choice(map(str, range(55))),
+	multiple=True, type=click.Choice(map(str, range(74))),
 	help="Node names by the number(s), e.g. for brncl-04, enter '4'"
 )
 @click.option(
