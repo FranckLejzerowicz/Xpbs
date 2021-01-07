@@ -101,10 +101,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
 
         # write command to cleanse the temporary folder
         if rm:
-            if gpu:
-                o.write('\nrm -fr $TMPDIR/%s_${SLURM_JOB_ID}\n' % i_job)
-            else:
-                o.write('\nrm -fr $TMPDIR/${PBS_JOBNAME}_${PBS_JOBID}\n')
+            o.write('\nrm -fr $TMPDIR\n' % i_job)
 
         if chmod:
             if len(chmod) != len([x for x in chmod if x.isdigit() and int(x) < 8]):
