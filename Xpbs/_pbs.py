@@ -17,7 +17,7 @@ def chunks(l, chunk_number):
     return [l[i:i + n] for i in range(0, len(l), n)]
 
 
-def get_nodes_ppn(n_: int, p: int) -> str:
+def get_nodes_ppn(n_: tuple, p: int) -> str:
     """
     Distribute the number of processors requested among the requested nodes.
 
@@ -26,7 +26,7 @@ def get_nodes_ppn(n_: int, p: int) -> str:
     :return:
     """
     # get the string version of the passed nodes numbers
-    n = ['0%s' % n if n < 10 else str(n) for n in n_]
+    n = ['0%s' % n if int(n) < 10 else str(n) for n in n_]
     if p == 1:
         # get the barnacle nodes with one processor per node if one processor is queried
         nodes_ppn = 'nodes=' + '+'.join(['brncl-%s:ppn=1' % i for i in n])
@@ -46,7 +46,7 @@ def get_nodes_ppn(n_: int, p: int) -> str:
 
 
 def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
-            p_procs: int, p_nodes_names, p_mem: tuple, gpu: bool,
+            p_procs: int, p_nodes_names: tuple, p_mem: tuple, gpu: bool,
             email: bool, email_address: str) -> list:
     """
     Collect the directives for the Torque or Slurm job.
