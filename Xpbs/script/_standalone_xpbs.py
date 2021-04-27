@@ -45,6 +45,10 @@ from Xpbs import __version__
 	help="Alternative temp folder to the one defined in $TMPDIR"
 )
 @click.option(
+	"--notmp/--no-notmp", default=False, show_default=True,
+	help="Do not set a temporary directory (use default)."
+)
+@click.option(
 	"-p", "--p-procs", required=False, default=1, type=int,
 	help="Number of processors", show_default=True
 )
@@ -109,6 +113,7 @@ def standalone_xpbs(
 		p_dir,
 		p_nodes,
 		p_tmp,
+		notmp,
 		p_procs,
 		p_time,
 		p_scratch_path,
@@ -132,6 +137,7 @@ def standalone_xpbs(
 		p_dir,
 		p_nodes,
 		p_tmp,
+		notmp,
 		p_procs,
 		p_time,
 		p_scratch_path,

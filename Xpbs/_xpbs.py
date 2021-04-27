@@ -28,8 +28,9 @@ ROOT = pkg_resources.resource_filename("Xpbs", "")
 
 
 def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
-             p_env: str, p_dir: str, p_nodes: int, p_tmp: str, p_procs: int,
-             p_time: str, p_scratch_path: str, p_mem: tuple, p_nodes_names: str,
+             p_env: str, p_dir: str, p_nodes: int, p_tmp: str,
+             notmp: bool, p_procs: int, p_time: str, p_scratch_path: str,
+             p_mem: tuple, p_nodes_names: str,
              email: bool, run: bool, noq: bool, gpu: bool, rm: bool,
              loc: bool, chmod: str) -> None:
     """
@@ -80,7 +81,8 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
         check_command(job_file, commands)
 
     # set environment and working directory
-    env = get_env(i_job, o_pbs, p_env, p_tmp, work_dir, gpu, p_scratch_path, ff_paths, ff_dirs, loc)
+    env = get_env(i_job, o_pbs, p_env, p_tmp, notmp, work_dir, gpu,
+                  p_scratch_path, ff_paths, ff_dirs, loc)
 
     # write the psb file to provide to "qsub"
     write_job(i_job, job_file, pbs, env, p_scratch_path, gpu,

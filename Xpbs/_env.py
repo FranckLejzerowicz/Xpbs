@@ -9,8 +9,9 @@
 from os.path import abspath, dirname, exists
 
 
-def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
-            gpu: bool, p_scratch_path: str, ff_paths: set, ff_dirs: set, loc: bool) -> list:
+def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
+            work_dir: str, gpu: bool, p_scratch_path: str, ff_paths: set,
+            ff_dirs: set, loc: bool) -> list:
     """
     Get the lines to be written as header to the job
     Including:
@@ -56,12 +57,13 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, work_dir: str,
         job_nodes = 'NNODES'
 
     # set temporary folder
-    if p_tmp:
-        env.append("export TMPDIR='%s'" % p_tmp.rstrip('/'))
-    # create the temporary folder
-    env.append('mkdir -p $TMPDIR/%s_${%s}' % (i_job, job_id))
-    env.append('export TMPDIR=$TMPDIR/%s_${%s}' % (i_job, job_id))
-    env.append("echo Temporary directory is $TMPDIR")
+    if not notmp:
+        if p_tmp:
+            env.append("export TMPDIR='%s'" % p_tmp.rstrip('/'))
+        # create the temporary folder
+        env.append('mkdir -p $TMPDIR/%s_${%s}' % (i_job, job_id))
+        env.append('export TMPDIR=$TMPDIR/%s_${%s}' % (i_job, job_id))
+        env.append("echo Temporary directory is $TMPDIR")
 
     ### Display the job context
     env.append('echo Running on host `hostname`')
