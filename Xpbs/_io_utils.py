@@ -12,9 +12,10 @@ from os.path import abspath, exists, expanduser, isfile
 from pathlib import Path
 
 
-def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: str,
-              gpu: bool, commands: list, outputs: list, ff_paths: set,
-              ff_dirs: set, rm: bool, chmod: str, loc: bool) -> None:
+def write_job(i_job: str, job_file: str, pbs: list, env: list,
+              p_scratch_path: str, gpu: bool, notmp: bool, commands: list,
+              outputs: list, ff_paths: set, ff_dirs: set, rm: bool,
+              chmod: str, loc: bool) -> None:
     """
     Write the actual .pbs / slurm .sh script based on
     the info collected from the command line.
@@ -50,7 +51,8 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
         o.write('\n')
         o.write('\n')
 
-        # if running on scratch, write commands to make directory for moved files/folders
+        # if running on scratch, write commands
+        # to make directory for moved files/folders
         if p_scratch_path and loc:
             for ff in set(ff_dirs):
                 o.write('mkdir -p %s\n' % ff)
@@ -65,22 +67,29 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
                 for ff in ff_dirs:
                     if ff in command:
                         if ff[0] == '/':
-                            command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
+                            command = command.replace(
+                                ' %s' % ff, ' ${locdir}%s' % ff)
                         else:
-                            command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
+                            command = command.replace(
+                                ' %s' % ff, ' ${locdir}/%s' % ff)
                 for ff in ff_paths:
                     if ff in command:
                         if ff[0] == '/':
-                            command = command.replace(' %s' % ff, ' ${locdir}%s' % ff)
+                            command = command.replace(
+                                ' %s' % ff, ' ${locdir}%s' % ff)
                         else:
-                            command = command.replace(' %s' % ff, ' ${locdir}/%s' % ff)
+                            command = command.replace(
+                                ' %s' % ff, ' ${locdir}/%s' % ff)
             o.write('%s\n' % command)
         o.write('\n')
         o.write('\n')
 
         # if running on scratch, write commands that move files back
         if p_scratch_path and loc:
-            copied_dirs = set([x for x in sorted(ff_dirs) for y in sorted(ff_dirs) if x not in y])
+            copied_dirs = set([
+                x for x in sorted(ff_dirs)
+                for y in sorted(ff_dirs) if x not in y
+            ])
             for ff in sorted(ff_dirs):
                 if ff not in copied_dirs:
                     if ff[0] == '/':
@@ -100,7 +109,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list, p_scratch_path: s
                 o.write('rm -rf ${locdir}\n')
 
         # write command to cleanse the temporary folder
-        if rm:
+        if rm and not notmp:
             o.write('\nrm -fr $TMPDIR\n')
 
         if chmod:

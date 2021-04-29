@@ -69,7 +69,8 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     # ff is not empty only if the -l is active
     # (i.e. if user wishes that the job happens on /localscratch file copies)
     conda_exe = get_conda_exes(p_env)
-    commands, outputs, ff_paths, ff_dirs = parse_command(i_script, p_scratch_path, p_env, conda_exe, loc)
+    commands, outputs, ff_paths, ff_dirs = parse_command(
+        i_script, p_scratch_path, p_env, conda_exe, loc)
 
     # pbs directives
     pbs = get_pbs(i_job, o_pbs, p_time, p_queue, p_nodes, p_procs,
@@ -85,7 +86,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
                   p_scratch_path, ff_paths, ff_dirs, loc)
 
     # write the psb file to provide to "qsub"
-    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu,
+    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, notmp,
               commands, outputs, ff_paths, ff_dirs, rm, chmod, loc)
     if run:
         print('Launched command: /bin/sh %s' % job_file)
