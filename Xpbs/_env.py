@@ -56,15 +56,15 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
         job_procs = 'NPROCS'
         job_nodes = 'NNODES'
 
-    env.append("jobid=`echo ${%s} | cut -d'.' -f 1`" % job_id)
+    env.append("CUR_JOBID=`echo ${%s} | cut -d'.' -f 1`" % job_id)
 
     # set temporary folder
     if not notmp:
         if p_tmp:
             env.append("export TMPDIR='%s'" % p_tmp.rstrip('/'))
         # create the temporary folder
-        env.append('mkdir -p $TMPDIR/%s_${jobid}' % i_job)
-        env.append('export TMPDIR=$TMPDIR/%s_${jobid}' % i_job)
+        env.append('mkdir -p $TMPDIR/%s_${CUR_JOBID}' % i_job)
+        env.append('export TMPDIR=$TMPDIR/%s_${CUR_JOBID}' % i_job)
         # env.append('mkdir -p $TMPDIR/%s_${%s}' % (i_job, job_id))
         # env.append('export TMPDIR=$TMPDIR/%s_${%s}' % (i_job, job_id))
         env.append("echo Temporary directory is $TMPDIR")
@@ -94,8 +94,8 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
         # env.append('echo "%s/%s_${%s}_slurm.o"' % (out_dir, i_job, job_id))
         # env.append('echo "%s/%s_${%s}_slurm.e"' % (out_dir, i_job, job_id))
     else:
-        env.append('jobstdout="%s/%s_${jobid}.o"' % (out_dir, i_job))
-        env.append('jobstderr="%s/%s_${jobid}.e"' % (out_dir, i_job))
+        env.append('jobstdout="%s/%s_${CUR_JOBID}.o"' % (out_dir, i_job))
+        env.append('jobstderr="%s/%s_${CUR_JOBID}.e"' % (out_dir, i_job))
         # env.append('jobstdout="%s/%s_${%s}.o"' % (out_dir, i_job, job_id))
         # env.append('jobstderr="%s/%s_${%s}.e"' % (out_dir, i_job, job_id))
         # env.append('echo "%s/%s_*.o"' % (out_dir, i_job))
