@@ -56,13 +56,17 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
         job_procs = 'NPROCS'
         job_nodes = 'NNODES'
 
+    env.append("jobid=echo ${%s} | cut -d'.' -f 1" % job_id)
+
     # set temporary folder
     if not notmp:
         if p_tmp:
             env.append("export TMPDIR='%s'" % p_tmp.rstrip('/'))
         # create the temporary folder
-        env.append('mkdir -p $TMPDIR/%s_${%s}' % (i_job, job_id))
-        env.append('export TMPDIR=$TMPDIR/%s_${%s}' % (i_job, job_id))
+        env.append('mkdir -p $TMPDIR/%s_${jobid}' % i_job)
+        env.append('export TMPDIR=$TMPDIR/%s_${jobid}' % i_job)
+        # env.append('mkdir -p $TMPDIR/%s_${%s}' % (i_job, job_id))
+        # env.append('export TMPDIR=$TMPDIR/%s_${%s}' % (i_job, job_id))
         env.append("echo Temporary directory is $TMPDIR")
 
     ### Display the job context
@@ -70,12 +74,14 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
     env.append('echo Time is `date`')
     env.append('echo Directory is `pwd`')
 
-    # example of handling the specifically set environmental variables, here for display
+    # example of handling the specifically set environmental variables,
+    # here for display
     # Calculate the number of processors/nodes allocated to this run.
     if not gpu:
         env.append('NPROCS=`wc -l < $PBS_NODEFILE`')
         env.append('NNODES=`uniq $PBS_NODEFILE | wc -l`')
-    env.append('echo Using ${%s} processors across ${%s} nodes' % (job_procs, job_nodes))
+    env.append('echo Using ${%s} processors across ${%s} nodes' % (
+        job_procs, job_nodes))
 
     if o_pbs:
         out_dir = abspath(dirname(o_pbs))
@@ -88,8 +94,10 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
         # env.append('echo "%s/%s_${%s}_slurm.o"' % (out_dir, i_job, job_id))
         # env.append('echo "%s/%s_${%s}_slurm.e"' % (out_dir, i_job, job_id))
     else:
-        env.append('jobstdout="%s/%s_${%s}.o"' % (out_dir, i_job, job_id))
-        env.append('jobstderr="%s/%s_${%s}.e"' % (out_dir, i_job, job_id))
+        env.append('jobstdout="%s/%s_${jobid}.o"' % (out_dir, i_job))
+        env.append('jobstderr="%s/%s_${jobid}.e"' % (out_dir, i_job))
+        # env.append('jobstdout="%s/%s_${%s}.o"' % (out_dir, i_job, job_id))
+        # env.append('jobstderr="%s/%s_${%s}.e"' % (out_dir, i_job, job_id))
         # env.append('echo "%s/%s_*.o"' % (out_dir, i_job))
         # env.append('echo "%s/%s_*.e"' % (out_dir, i_job))
     env.append('echo "${jobstdout}"')

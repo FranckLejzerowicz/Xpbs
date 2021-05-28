@@ -39,7 +39,8 @@ def collect_ff(abs_line: str, ff_paths: set,
                 which_out = subprocess.getstatusoutput('which %s' % abs_i_s)
                 if which_out[0]:
                     ff_paths.add(abs_i_s)
-            # get only local -> scratch folder paths mapping for root based folders
+            # get only local -> scratch folder paths mapping for
+            # root based folders
             elif len(abs_i_s) > 1 and abs_i_s[0] == '/':
                 ff_dirs.add(dirname(abs_i_s))
                 ff_paths.add(abs_i_s)
@@ -106,7 +107,8 @@ def collect_abs_paths(line_input: str, p_env: str, conda_exe: set,
                 abs_line.append(x)
             else:
                 which_out = subprocess.getstatusoutput('which %s' % x)
-                # cmd_out = subprocess.getstatusoutput('%s --help' % ' '.join(L[:(idx+1)]))
+                # cmd_out = subprocess.getstatusoutput
+                # ('%s --help' % ' '.join(L[:(idx+1)]))
                 if which_out[0] and 'no %s in' % x not in which_out[1]:
                     abs_line.append(x)
                 # elif cmd_out[0] == 0:
@@ -121,12 +123,13 @@ def collect_abs_paths(line_input: str, p_env: str, conda_exe: set,
 
 
 def get_commands_file(p_scratch_path: str, path: str, commands: list,
-                      outputs: list, ff_paths: set, ff_dirs: set,
-                      p_env: str, conda_exe: set, loc: bool) -> (list, list, set, set):
+                      outputs: list, ff_paths: set, ff_dirs: set, p_env: str,
+                      conda_exe: set, loc: bool) -> (list, list, set, set):
     """
     Parse the .sh file and collect the actual script commands.
 
-    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
+    :param p_scratch_path: Folder for moving files and computing in
+        (default = do not move to scratch).
     :param path: script file.
     :param commands: full list of commands to be appended.
     :param outputs: output files to potentially chmod.
@@ -143,15 +146,17 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list,
     with open(path) as f:
         # for each command of the script
         for line in f:
-            # collect the absolute paths of the files/folders that exist or keep words as are
+            # collect the absolute paths of the files/folders that exist
+            # or keep words as are
             abs_line = collect_abs_paths(line, p_env, conda_exe, outputs)
             # add this command with modified path to abspath as a new command
             commands.append(abs_line)
             # if it is asked to work on a scratch folder
             if p_scratch_path and loc:
                 if p_scratch_path[0] != '/':
-                    print('scratch folder path must by absolute, i.e. start with "/"'
-                          '.. Do you mean "/%s" ?\nExiting...' % p_scratch_path)
+                    print('scratch folder path must by absolute, i.e. start '
+                          'with "/" .. Do you mean "/%s" ?\nExiting...' %
+                          p_scratch_path)
                     sys.exit(1)
                 # get the path to be moved to this scratch
                 ff_paths, ff_dirs = collect_ff(
@@ -169,7 +174,8 @@ def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: set,
     Parse the argument directly passed in the command line to Xpby
     and make a pbs script transformation for them.
 
-    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
+    :param p_scratch_path: Folder for moving files and computing in
+        (default = do not move to scratch).
     :param i_script: direct command line.
     :param ff_paths: files to move on scratch.
     :param ff_dirs: folders to move on scratch.
@@ -205,7 +211,8 @@ def parse_command(i_script: str, p_scratch_path: str, p_env: str,
     Main interpreter of the passed scripts / command to the -i option.
 
     :param i_script: script file.
-    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
+    :param p_scratch_path: Folder for moving files and computing in
+        (default = do not move to scratch).
     :param p_env: Conda environment to run the job.
     :return:
         commands    : appended commands list.
@@ -221,7 +228,8 @@ def parse_command(i_script: str, p_scratch_path: str, p_env: str,
     if isfile(i_script):
         # get the command from the file content
         commands, outputs, ff_paths, ff_dirs = get_commands_file(
-            p_scratch_path, i_script, commands, outputs, ff_paths, ff_dirs, p_env, conda_exe, loc
+            p_scratch_path, i_script, commands, outputs, ff_paths, ff_dirs,
+            p_env, conda_exe, loc
         )
     # if the script file does not exists
     # (-> it could be a command passed directly to the command line)
