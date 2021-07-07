@@ -91,7 +91,11 @@ from Xpbs import __version__
 )
 @click.option(
 	"--gpu/--no-gpu", default=False, show_default=True,
-	help="Switch from Torque to Slurm (including querying 1 gpu)"
+	help="Query a gpu (which also switches from Torque to Slurm)"
+)
+@click.option(
+	"--slurm/--no-slurm", default=False, show_default=True,
+	help="Switch from Torque to Slurm"
 )
 @click.option(
 	"--rm/--no-rm", default=True, show_default=True,
@@ -124,6 +128,7 @@ def standalone_xpbs(
 		noq,
 		gpu,
 		rm,
+		slurm,
 		loc,
 		p_chmod
 ):
@@ -148,6 +153,7 @@ def standalone_xpbs(
 		noq,
 		gpu,
 		rm,
+		slurm,
 		loc,
 		p_chmod
 	)

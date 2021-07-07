@@ -47,7 +47,7 @@ def get_nodes_ppn(n_: tuple, p: int) -> str:
 
 def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
             p_procs: int, p_nodes_names: tuple, p_mem: tuple, gpu: bool,
-            email: bool, email_address: str) -> list:
+            slurm: bool, email: bool, email_address: str) -> list:
     """
     Collect the directives for the Torque or Slurm job.
 
@@ -69,13 +69,14 @@ def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
     pbs = ['#!/bin/bash']
 
     # if running on GPU : using Slurm
-    if gpu:
+    if gpu or slurm:
         pbs.append('#SBATCH --export=ALL')
         pbs.append('#SBATCH --job-name=%s' % i_job)
         if p_queue:
             print('Warning: no queue but a PARTITION (automatically set to "gpu")')
-        pbs.append('#SBATCH --partition=gpu')
-        pbs.append('#SBATCH --gres=gpu:1')
+        if gpu:
+            pbs.append('#SBATCH --partition=gpu')
+            pbs.append('#SBATCH --gres=gpu:1')
         if email:
             pbs.append('#SBATCH --mail-type=END,FAIL')
         else:
@@ -88,13 +89,15 @@ def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
         pbs.append('#SBATCH -o %s/%s_%sj_slurm.o' % (out_dir, i_job, '%'))
         pbs.append('#SBATCH -e %s/%s_%sj_slurm.e' % (out_dir, i_job, '%'))
         # Specify number of CPUs (max 2 nodes, 32 processors per node) and of memory
-        if p_nodes_names:
-            pbs.append('#SBATCH --nodelist=brncl-%s' % p_nodes_names[0])
+        if gpu:
+            if p_nodes_names:
+                pbs.append('#SBATCH --nodelist=brncl-%s' % p_nodes_names[0])
+            else:
+                pbs.append('#SBATCH --nodelist=brncl-33')
+            pbs.append('#SBATCH --nodes=1')
         else:
-            pbs.append('#SBATCH --nodelist=brncl-33')
-        pbs.append('#SBATCH --nodes=1')
-        # pbs.append('#SBATCH --cpus-per-task=1')
-        # pbs.append('#SBATCH --ntasks-per-node=1')
+            pbs.append('#SBATCH --nodes=%s' % p_nodes)
+            pbs.append('#SBATCH --ntasks-per-node=%s' % p_procs)
 
         m_num = float(p_mem[0])
         m_byt = p_mem[1]

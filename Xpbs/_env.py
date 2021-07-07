@@ -10,8 +10,8 @@ from os.path import abspath, dirname, exists
 
 
 def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
-            work_dir: str, gpu: bool, p_scratch_path: str, ff_paths: set,
-            ff_dirs: set, loc: bool) -> list:
+            work_dir: str, gpu: bool, slurm: bool, p_scratch_path: str,
+            ff_paths: set, ff_dirs: set, loc: bool) -> list:
     """
     Get the lines to be written as header to the job
     Including:
@@ -45,7 +45,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
             env.append('source activate %s' % p_env)
 
     # get the Torque / Slurm env variables ready for more generic usage below
-    if gpu:
+    if gpu or slurm:
         job_id = 'SLURM_JOB_ID'
         job_dir = 'SLURM_SUBMIT_DIR'
         job_procs = 'SLURM_NPROCS'
@@ -77,7 +77,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
     # example of handling the specifically set environmental variables,
     # here for display
     # Calculate the number of processors/nodes allocated to this run.
-    if not gpu:
+    if not gpu and not slurm:
         env.append('NPROCS=`wc -l < $PBS_NODEFILE`')
         env.append('NNODES=`uniq $PBS_NODEFILE | wc -l`')
     env.append('echo Using ${%s} processors across ${%s} nodes' % (
@@ -88,7 +88,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
     else:
         out_dir = '${%s}' % job_dir
 
-    if gpu:
+    if gpu or slurm:
         env.append('jobstdout="%s/%s_${%s}_slurm.o"' % (out_dir, i_job, job_id))
         env.append('jobstderr="%s/%s_${%s}_slurm.e"' % (out_dir, i_job, job_id))
         # env.append('echo "%s/%s_${%s}_slurm.o"' % (out_dir, i_job, job_id))

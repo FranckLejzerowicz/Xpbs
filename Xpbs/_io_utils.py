@@ -13,9 +13,9 @@ from pathlib import Path
 
 
 def write_job(i_job: str, job_file: str, pbs: list, env: list,
-              p_scratch_path: str, gpu: bool, notmp: bool, commands: list,
-              outputs: list, ff_paths: set, ff_dirs: set, rm: bool,
-              chmod: str, loc: bool) -> None:
+              p_scratch_path: str, gpu: bool, slurm: bool, notmp: bool,
+              commands: list, outputs: list, ff_paths: set, ff_dirs: set,
+              rm: bool, chmod: str, loc: bool) -> None:
     """
     Write the actual .pbs / slurm .sh script based on
     the info collected from the command line.
@@ -101,7 +101,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
                     o.write('if [ -f ${locdir}%s ]; then rsync -auq ${locdir}%s %s; fi\n' % (ff, ff, ff))
                 else:
                     o.write('if [ -f ${locdir}/%s ]; then rsync -auq ${locdir}/%s %s; fi\n' % (ff, ff, ff))
-            if gpu:
+            if gpu or slurm:
                 o.write('cd $SLURM_SUBMIT_DIR\n')
             else:
                 o.write('cd $PBS_O_WORKDIR\n')
@@ -122,7 +122,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
         o.write('echo "Done!"\n')
 
 
-def get_job_file(o_pbs, i_job, gpu):
+def get_job_file(o_pbs, i_job, gpu, slurm):
     """
     Get the filename of the output torque (.pbs) or slurm job.
 
@@ -143,8 +143,8 @@ def get_job_file(o_pbs, i_job, gpu):
             ':', '-'
         )
         # add .pbs or _slurm.sh depending on whether it is to run on GPU.
-        if gpu:
-            job_file = '%s/%s_%s_slurm.sh' % (abspath('.'), i_job, cur_time)
+        if gpu or slurm:
+            job_file = '%s/%s_%s.slm' % (abspath('.'), i_job, cur_time)
         else:
             job_file = '%s/%s_%s.pbs' % (abspath('.'), i_job, cur_time)
     # if the output filename was provided, just keep it
