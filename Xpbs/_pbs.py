@@ -73,10 +73,13 @@ def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
         pbs.append('#SBATCH --export=ALL')
         pbs.append('#SBATCH --job-name=%s' % i_job)
         if p_queue:
-            print('Warning: no queue but a PARTITION (automatically set to "gpu")')
+            print('Warning: no queue but a PARTITION '
+                  '(automatically set to "gpu")')
         if gpu:
             pbs.append('#SBATCH --partition=gpu')
             pbs.append('#SBATCH --gres=gpu:1')
+        else:
+            pbs.append('#SBATCH --partition=long')
         if email:
             pbs.append('#SBATCH --mail-type=END,FAIL')
         else:
@@ -86,9 +89,10 @@ def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
             out_dir = dirname(abspath(o_pbs))
         else:
             out_dir = '${SLURM_SUBMIT_DIR}'
-        pbs.append('#SBATCH -o %s/%s_%sj_slurm.o' % (out_dir, i_job, '%'))
-        pbs.append('#SBATCH -e %s/%s_%sj_slurm.e' % (out_dir, i_job, '%'))
-        # Specify number of CPUs (max 2 nodes, 32 processors per node) and of memory
+        pbs.append('#SBATCH -output=%s/%s_%sj_slurm.o' % (out_dir, i_job, '%'))
+        pbs.append('#SBATCH -error=%s/%s_%sj_slurm.e' % (out_dir, i_job, '%'))
+        # Specify number of CPUs (max 2 nodes,
+        # 32 processors per node) and of memory
         if gpu:
             if p_nodes_names:
                 pbs.append('#SBATCH --nodelist=brncl-%s' % p_nodes_names[0])
