@@ -81,16 +81,16 @@ def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
         else:
             pbs.append('#SBATCH --partition=long')
         if email:
-            pbs.append('#SBATCH --mail-type=END,FAIL')
+            pbs.append('#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80')
         else:
-            pbs.append('#SBATCH --mail-type=FAIL')
+            pbs.append('#SBATCH --mail-type=FAIL,TIME_LIMIT_80')
         pbs.append('#SBATCH --mail-user="%s"' % email_address)
         if o_pbs:
             out_dir = dirname(abspath(o_pbs))
         else:
             out_dir = '${SLURM_SUBMIT_DIR}'
-        pbs.append('#SBATCH -output=%s/%s_%sj_slurm.o' % (out_dir, i_job, '%'))
-        pbs.append('#SBATCH -error=%s/%s_%sj_slurm.e' % (out_dir, i_job, '%'))
+        pbs.append('#SBATCH --output=%s/%s_%sj_slurm.o' % (out_dir, i_job, '%'))
+        pbs.append('#SBATCH --error=%s/%s_%sj_slurm.e' % (out_dir, i_job, '%'))
         # Specify number of CPUs (max 2 nodes,
         # 32 processors per node) and of memory
         if gpu:
