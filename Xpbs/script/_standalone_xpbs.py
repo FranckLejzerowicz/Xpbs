@@ -78,6 +78,10 @@ from Xpbs import __version__
 		 "files (enter a 3 digit code)."
 )
 @click.option(
+	"-w", "--p-pwd", default=None, show_default=True,
+	help="Working directory to use instead of $PBS_O_WORKDIR"
+)
+@click.option(
 	"--email/--no-email", default=False, show_default=True,
 	help="Send email at job completion (always if fail)"
 )
@@ -130,7 +134,8 @@ def standalone_xpbs(
 		rm,
 		slurm,
 		loc,
-		p_chmod
+		p_chmod,
+		p_pwd
 ):
 
 	run_xpbs(
@@ -155,7 +160,8 @@ def standalone_xpbs(
 		rm,
 		slurm,
 		loc,
-		p_chmod
+		p_chmod,
+		p_pwd
 	)
 
 

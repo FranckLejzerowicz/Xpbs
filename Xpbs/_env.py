@@ -11,7 +11,7 @@ from os.path import abspath, dirname, exists
 
 def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
             work_dir: str, gpu: bool, slurm: bool, p_scratch_path: str,
-            ff_paths: set, ff_dirs: set, loc: bool) -> list:
+            ff_paths: set, ff_dirs: set, loc: bool, p_pwd: str) -> list:
     """
     Get the lines to be written as header to the job
     Including:
@@ -56,6 +56,9 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
         job_procs = 'NPROCS'
         job_nodes = 'NNODES'
 
+    if p_pwd:
+        env.append("export %s='%s'" % (job_dir, p_pwd))
+
     env.append("CUR_JOBID=`echo ${%s} | cut -d'.' -f 1`" % job_id)
 
     # set temporary folder
@@ -69,7 +72,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
         # env.append('export TMPDIR=$TMPDIR/%s_${%s}' % (i_job, job_id))
         env.append("echo Temporary directory is $TMPDIR")
 
-    ### Display the job context
+    # Display the job context
     env.append('echo Running on host `hostname`')
     env.append('echo Time is `date`')
     env.append('echo Directory is `pwd`')

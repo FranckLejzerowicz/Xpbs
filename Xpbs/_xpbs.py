@@ -32,7 +32,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
              notmp: bool, p_procs: int, p_time: str, p_scratch_path: str,
              p_mem: tuple, p_nodes_names: str,
              email: bool, run: bool, noq: bool, gpu: bool, rm: bool,
-             slurm: bool, loc: bool, chmod: str) -> None:
+             slurm: bool, loc: bool, chmod: str, p_pwd: str) -> None:
     """
     Main script to go from (.sh) script to the output file
     :param i_script: Script of command lines to transform to Torque/Slurm job.
@@ -83,7 +83,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
 
     # set environment and working directory
     env = get_env(i_job, o_pbs, p_env, p_tmp, notmp, work_dir, gpu,
-                  slurm, p_scratch_path, ff_paths, ff_dirs, loc)
+                  slurm, p_scratch_path, ff_paths, ff_dirs, loc, p_pwd)
 
     # write the psb file to provide to "qsub"
     write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, slurm, notmp,
