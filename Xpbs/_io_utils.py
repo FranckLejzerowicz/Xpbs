@@ -110,7 +110,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
 
         # write command to cleanse the temporary folder
         if rm and not notmp:
-            o.write('\nrm -fr $TMPDIR\n')
+            o.write('\nrm -fr ${TMPDIR}\n')
 
         if chmod:
             if len(chmod) != len([x for x in chmod if x.isdigit() and int(x) < 8]):

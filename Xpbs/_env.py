@@ -61,10 +61,13 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
 
     env.append("CUR_JOBID=`echo ${%s} | cut -d'.' -f 1`" % job_id)
 
+    if slurm:
+        env.append("TMPDIR='/panfs/${USER}'")
+
     # set temporary folder
     if not notmp:
         if p_tmp:
-            env.append("export TMPDIR='%s'" % p_tmp.rstrip('/'))
+            env.append("TMPDIR='%s'" % p_tmp.rstrip('/'))
         # create the temporary folder
         env.append('mkdir -p $TMPDIR/%s_${CUR_JOBID}' % i_job)
         env.append('export TMPDIR=$TMPDIR/%s_${CUR_JOBID}' % i_job)
