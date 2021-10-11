@@ -67,7 +67,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
     # set temporary folder
     if not notmp:
         if p_tmp:
-            env.append("TMPDIR='%s'" % p_tmp.rstrip('/'))
+            env.append("TMPDIR=%s" % p_tmp.rstrip('/'))
         # create the temporary folder
         env.append('mkdir -p $TMPDIR/%s_${CUR_JOBID}' % i_job)
         env.append('export TMPDIR=$TMPDIR/%s_${CUR_JOBID}' % i_job)
