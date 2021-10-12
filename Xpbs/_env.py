@@ -62,7 +62,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
     env.append("CUR_JOBID=`echo ${%s} | cut -d'.' -f 1`" % job_id)
 
     if slurm:
-        env.append("TMPDIR='/panfs/${USER}'")
+        env.append("TMPDIR=/panfs/${USER}")
 
     # set temporary folder
     if not notmp:
