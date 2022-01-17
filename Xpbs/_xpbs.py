@@ -27,12 +27,12 @@ from Xpbs._env import get_env
 ROOT = pkg_resources.resource_filename("Xpbs", "")
 
 
-def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
-             p_env: str, p_dir: str, p_nodes: int, p_tmp: str,
-             notmp: bool, p_procs: int, p_time: str, p_scratch_path: str,
-             p_mem: tuple, p_nodes_names: str,
+def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str, p_env: str,
+             p_dir: str, p_nodes: int, p_tmp: str, notmp: bool, p_procs: int,
+             p_time: str, p_scratch_path: str, p_mem: tuple, p_nodes_names: str,
              email: bool, run: bool, noq: bool, gpu: bool, rm: bool,
-             slurm: bool, loc: bool, chmod: str, p_pwd: str) -> None:
+             slurm: bool, loc: bool, chmod: str, p_pwd: str,
+             show_config: bool) -> None:
     """
     Main script to go from (.sh) script to the output file
     :param i_script: Script of command lines to transform to Torque/Slurm job.
@@ -58,7 +58,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str,
     """
 
     # get address from config file (which must exist)
-    email_address = get_email_address(ROOT)
+    email_address = get_email_address(ROOT, show_config)
 
     # get the filename of the output torque (.pbs) or slurm job
     job_file = get_job_file(o_pbs, i_job, gpu, slurm)

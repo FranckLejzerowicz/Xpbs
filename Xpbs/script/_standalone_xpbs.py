@@ -13,35 +13,35 @@ from Xpbs import __version__
 
 @click.command()
 @click.option(
-	"-i", "--i-script", required=True, nargs=1,
+	"-i", "--i-script", nargs=1,
 	help="Script of command lines to transform to Torque/Slurm job."
 )
 @click.option(
-	"-o", "--o-pbs", required=False, default=None, type=str,
+	"-o", "--o-pbs", default=None, type=str,
 	help="Output job file name (default to <input>_TIMESTAMP.pbs)"
 )
 @click.option(
-	"-j", "--i-job", required=True, type=str, help="Job name."
+	"-j", "--i-job", type=str, help="Job name."
 )
 @click.option(
-	"-q", "--p-queue", required=False, default=None,
+	"-q", "--p-queue", default=None,
 	type=click.Choice(['short4gb','med4gb','med8gb','long8gb','longmem','highmem']),
 	help="Queue name."
 )
 @click.option(
-	"-e", "--p-env", required=False, default=None, type=str,
+	"-e", "--p-env", default=None, type=str,
 	help="Conda environment to run the job."
 )
 @click.option(
-	"-d", "--p-dir", required=False, help="Output directory", type=str,
+	"-d", "--p-dir", help="Output directory", type=str,
 	default = '.', show_default=True
 )
 @click.option(
-	"-n", "--p-nodes", required=False, default=1, type=int,
+	"-n", "--p-nodes", default=1, type=int,
 	help="Number of nodes", show_default=True
 )
 @click.option(
-	"-T", "--p-tmp", required=False, default=None, type=str,
+	"-T", "--p-tmp", default=None, type=str,
 	help="Alternative temp folder to the one defined in $TMPDIR"
 )
 @click.option(
@@ -49,12 +49,11 @@ from Xpbs import __version__
 	help="Do not set a temporary directory (use default)."
 )
 @click.option(
-	"-p", "--p-procs", required=False, default=1, type=int,
+	"-p", "--p-procs", default=1, type=int,
 	help="Number of processors", show_default=True
 )
 @click.option(
-	"-t", "--p-time", required=False,
-	default="10", show_default=True,
+	"-t", "--p-time", default="10", show_default=True,
 	help="Walltime limit (1 integers: hours)"
 )
 @click.option(
@@ -63,12 +62,12 @@ from Xpbs import __version__
 	help="panasas scratch folder for moving files and computing"
 )
 @click.option(
-	"-M", "--p-mem", required=False, nargs=2, show_default=False, default=('1', 'gb'),
+	"-M", "--p-mem", nargs=2, show_default=False, default=('1', 'gb'),
 	help="Expected memory usage needs two entries separated by a space: "
 		 "(1) an integer and (2) one of 'b', 'kb', 'mb', 'gb'. (Default: '1 gb')"
 )
 @click.option(
-	"-N", "--p-nodes-names", required=False, default=None,
+	"-N", "--p-nodes-names", default=None,
 	multiple=True, type=click.Choice(map(str, range(74))),
 	help="Node names by the number(s), e.g. for brncl-04, enter '4'"
 )
@@ -109,6 +108,10 @@ from Xpbs import __version__
 	"--loc/--no-loc", default=True, show_default=True,
 	help="Use panasas scratch folder"
 )
+@click.option(
+	"--show-config/--no-show-config", default=False, show_default=True,
+	help="Shopw the current config file content"
+)
 @click.version_option(__version__, prog_name="Xpbs")
 
 
@@ -135,7 +138,8 @@ def standalone_xpbs(
 		slurm,
 		loc,
 		p_chmod,
-		p_pwd
+		p_pwd,
+		show_config
 ):
 
 	run_xpbs(
@@ -161,7 +165,8 @@ def standalone_xpbs(
 		slurm,
 		loc,
 		p_chmod,
-		p_pwd
+		p_pwd,
+		show_config
 	)
 
 

@@ -167,7 +167,7 @@ def get_work_dir(p_dir: str):
     return work_dir
 
 
-def get_email_address(root: str) -> str:
+def get_email_address(root: str, show_config: bool) -> str:
     """
     Collect the email address from the edited config file.
 
@@ -187,6 +187,9 @@ def get_email_address(root: str) -> str:
             for line in f:
                 ls = line.strip().split()
                 break
+        if show_config:
+            print(line)
+            sys.exit(0)
         # stop is any issue encountered (not two fields, not edited, not correctly edited)
         if len(ls) != 2:
             print('Problem with config file:\n- %s does not contain two columns\n-> Exiting...' % config)
