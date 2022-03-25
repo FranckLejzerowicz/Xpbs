@@ -8,12 +8,11 @@
 
 import sys
 import subprocess
-import pkg_resources
-
 from Xpbs._io_utils import (
     get_job_file,
     get_work_dir,
     get_email_address,
+    get_nodes_names,
     write_job
 )
 from Xpbs._cmd import parse_command, get_conda_exes
@@ -24,15 +23,32 @@ from Xpbs._check import (
 )
 from Xpbs._env import get_env
 
-ROOT = pkg_resources.resource_filename("Xpbs", "")
 
-
-def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str, p_env: str,
-             p_dir: str, p_nodes: int, p_tmp: str, notmp: bool, p_procs: int,
-             p_time: str, p_scratch_path: str, p_mem: tuple, p_nodes_names: str,
-             email: bool, run: bool, noq: bool, gpu: bool, rm: bool,
-             slurm: bool, loc: bool, chmod: str, p_pwd: str,
-             show_config: bool) -> None:
+def run_xpbs(
+        i_script: str,
+        o_pbs: str,
+        i_job: str,
+        p_queue: str,
+        p_env: str,
+        p_dir: str,
+        p_nodes: int,
+        p_tmp: str,
+        notmp: bool,
+        p_procs: int,
+        p_time: str,
+        p_scratch_path: str,
+        p_mem: tuple,
+        p_nodes_names: str,
+        email: bool,
+        run: bool,
+        noq: bool,
+        gpu: bool,
+        rm: bool,
+        torque: bool,
+        loc: bool,
+        chmod: str,
+        p_pwd: str,
+        show_config: bool) -> None:
     """
     Main script to go from (.sh) script to the output file
     :param i_script: Script of command lines to transform to Torque/Slurm job.
@@ -58,10 +74,11 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str, p_env: str,
     """
 
     # get address from config file (which must exist)
-    email_address = get_email_address(ROOT, show_config)
+    email_address = get_email_address(show_config)
+    nodes_names = get_nodes_names()
 
     # get the filename of the output torque (.pbs) or slurm job
-    job_file = get_job_file(o_pbs, i_job, gpu, slurm)
+    job_file = get_job_file(o_pbs, i_job, gpu, torque)
 
     # get the absolute path of the working directory
     work_dir = get_work_dir(p_dir)
@@ -74,7 +91,7 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str, p_env: str,
 
     # pbs directives
     pbs = get_pbs(i_job, o_pbs, p_time, p_queue, p_nodes, p_procs,
-                  p_nodes_names, p_mem, gpu, slurm, email, email_address)
+                  p_nodes_names, p_mem, gpu, torque, email, email_address)
 
     # print-based, visual checks
     if not noq:
@@ -83,10 +100,10 @@ def run_xpbs(i_script: str, o_pbs: str, i_job: str, p_queue: str, p_env: str,
 
     # set environment and working directory
     env = get_env(i_job, o_pbs, p_env, p_tmp, notmp, work_dir, gpu,
-                  slurm, p_scratch_path, ff_paths, ff_dirs, loc, p_pwd)
+                  torque, p_scratch_path, ff_paths, ff_dirs, loc, p_pwd)
 
     # write the psb file to provide to "qsub"
-    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, slurm, notmp,
+    write_job(i_job, job_file, pbs, env, p_scratch_path, gpu, torque, notmp,
               commands, outputs, ff_paths, ff_dirs, rm, chmod, loc)
     if run:
         print('Launched command: /bin/sh %s' % job_file)

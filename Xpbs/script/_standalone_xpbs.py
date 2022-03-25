@@ -14,19 +14,19 @@ from Xpbs import __version__
 @click.command()
 @click.option(
 	"-i", "--i-script", nargs=1,
-	help="Script of command lines to transform to Torque/Slurm job."
+	help="Script of command lines to transform to Slurm/Torque job."
 )
 @click.option(
 	"-o", "--o-pbs", default=None, type=str,
-	help="Output job file name (default to <input>_TIMESTAMP.pbs)"
+	help="Output job file name (default to <input>_TIMESTAMP.slm)"
 )
 @click.option(
 	"-j", "--i-job", type=str, help="Job name."
 )
 @click.option(
-	"-q", "--p-queue", default=None,
-	type=click.Choice(['short4gb','med4gb','med8gb','long8gb','longmem','highmem']),
-	help="Queue name."
+	"-q", "--p-queue", default='normal',
+	type=click.Choice(['normal', 'bigmem', 'accel', 'optimist']),
+	help="Partition name."
 )
 @click.option(
 	"-e", "--p-env", default=None, type=str,
@@ -34,11 +34,15 @@ from Xpbs import __version__
 )
 @click.option(
 	"-d", "--p-dir", help="Output directory", type=str,
-	default = '.', show_default=True
+	default='.', show_default=True
 )
 @click.option(
 	"-n", "--p-nodes", default=1, type=int,
 	help="Number of nodes", show_default=True
+)
+@click.option(
+	"-p", "--p-procs", default=1, type=int,
+	help="Number of processors", show_default=True
 )
 @click.option(
 	"-T", "--p-tmp", default=None, type=str,
@@ -49,36 +53,31 @@ from Xpbs import __version__
 	help="Do not set a temporary directory (use default)."
 )
 @click.option(
-	"-p", "--p-procs", default=1, type=int,
-	help="Number of processors", show_default=True
-)
-@click.option(
 	"-t", "--p-time", default="10", show_default=True,
 	help="Walltime limit (1 integers: hours)"
 )
 @click.option(
 	"-l", "--p-scratch-path", show_default=True,
-	default='/panfs/panfs1.ucsd.edu/panscratch/${USER}',
-	help="panasas scratch folder for moving files and computing"
+	default='/cluster/work/users/${USER}',
+	help="scratch folder for moving files and computing"
 )
 @click.option(
-	"-M", "--p-mem", nargs=2, show_default=False, default=('1', 'gb'),
-	help="Expected memory usage needs two entries separated by a space: "
-		 "(1) an integer and (2) one of 'b', 'kb', 'mb', 'gb'. (Default: '1 gb')"
+	"-M", "--p-mem", nargs=2, show_default=False, default=('500', 'mb'),
+	help="Expected memory usage needs two entries separated by a space: (1) an"
+		 " integer and (2) one of 'mb', 'gb'. (Default: '500 mb')"
 )
 @click.option(
 	"-N", "--p-nodes-names", default=None,
 	multiple=True, type=click.Choice(map(str, range(74))),
-	help="Node names by the number(s), e.g. for brncl-04, enter '4'"
+	help="Node names by the number(s), e.g. for c-04, enter '4'"
 )
 @click.option(
 	"-c", "--p-chmod", default=None, show_default=True,
-	help="Change permission on all the output "
-		 "files (enter a 3 digit code)."
+	help="Change permission on all the output files (enter a 3 digit code)."
 )
 @click.option(
 	"-w", "--p-pwd", default=None, show_default=True,
-	help="Working directory to use instead of $PBS_O_WORKDIR"
+	help="Working directory to use instead of $SLURM_SUBMIT_DIR"
 )
 @click.option(
 	"--email/--no-email", default=False, show_default=True,
@@ -86,31 +85,31 @@ from Xpbs import __version__
 )
 @click.option(
 	"--run/--no-run", default=False, show_default=True,
-	help="Run the PBS job before exiting (subprocess)"
+	help="Run the job before exiting (subprocess)"
 )
 @click.option(
-	"--noq/--no-noq", default=False, show_default=True,
-	help="Do not ask for user-input 'y/n' sanity check"
+	"--noq/--no-noq", default=True, show_default=True,
+	help="Print script and ask for user-input 'y/n' sanity check"
 )
 @click.option(
 	"--gpu/--no-gpu", default=False, show_default=True,
-	help="Query a gpu (which also switches from Torque to Slurm)"
+	help="Query a gpu"
 )
 @click.option(
-	"--slurm/--no-slurm", default=False, show_default=True,
-	help="Switch from Torque to Slurm"
+	"--torque/--no-torque", default=False, show_default=True,
+	help="Switch from Slurm to Torque"
 )
 @click.option(
 	"--rm/--no-rm", default=True, show_default=True,
-	help="Remove the job's temporary and panfs/scratch files."
+	help="Remove the job's scratch files."
 )
 @click.option(
 	"--loc/--no-loc", default=True, show_default=True,
-	help="Use panasas scratch folder"
+	help="Use scratch folder"
 )
 @click.option(
 	"--show-config/--no-show-config", default=False, show_default=True,
-	help="Shopw the current config file content"
+	help="Show the current config file content"
 )
 @click.version_option(__version__, prog_name="Xpbs")
 
@@ -135,7 +134,7 @@ def standalone_xpbs(
 		noq,
 		gpu,
 		rm,
-		slurm,
+		torque,
 		loc,
 		p_chmod,
 		p_pwd,
@@ -162,7 +161,7 @@ def standalone_xpbs(
 		noq,
 		gpu,
 		rm,
-		slurm,
+		torque,
 		loc,
 		p_chmod,
 		p_pwd,

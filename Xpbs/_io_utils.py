@@ -5,15 +5,18 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
-
 import sys
 import datetime
-from os.path import abspath, exists, expanduser, isfile
+import subprocess
+import pkg_resources
+from os.path import abspath, exists, isfile
 from pathlib import Path
+
+ROOT = pkg_resources.resource_filename("Xpbs", "")
 
 
 def write_job(i_job: str, job_file: str, pbs: list, env: list,
-              p_scratch_path: str, gpu: bool, slurm: bool, notmp: bool,
+              p_scratch_path: str, gpu: bool, torque: bool, notmp: bool,
               commands: list, outputs: list, ff_paths: set, ff_dirs: set,
               rm: bool, chmod: str, loc: bool) -> None:
     """
@@ -101,10 +104,10 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
                     o.write('if [ -f ${locdir}%s ]; then rsync -auq ${locdir}%s %s; fi\n' % (ff, ff, ff))
                 else:
                     o.write('if [ -f ${locdir}/%s ]; then rsync -auq ${locdir}/%s %s; fi\n' % (ff, ff, ff))
-            if gpu or slurm:
-                o.write('cd $SLURM_SUBMIT_DIR\n')
-            else:
+            if torque:
                 o.write('cd $PBS_O_WORKDIR\n')
+            else:
+                o.write('cd $SLURM_SUBMIT_DIR\n')
             if rm:
                 o.write('rm -rf ${locdir}\n')
 
@@ -113,16 +116,18 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
             o.write('\nrm -fr ${TMPDIR}\n')
 
         if chmod:
-            if len(chmod) != len([x for x in chmod if x.isdigit() and int(x) < 8]):
+            if len(chmod) != len([
+                x for x in chmod if x.isdigit() and int(x) < 8]):
                 print('Problem with the entered chmod "%s"\nIgnoring' % chmod)
             else:
                 o.write('\n\n')
                 for output in set(outputs):
-                    o.write('if [ -f %s ]; then chmod %s %s; fi\n' % (output, chmod, output))
+                    o.write('if [ -f %s ]; then chmod %s %s; fi\n' % (
+                        output, chmod, output))
         o.write('echo "Done!"\n')
 
 
-def get_job_file(o_pbs, i_job, gpu, slurm):
+def get_job_file(o_pbs, i_job, gpu, torque):
     """
     Get the filename of the output torque (.pbs) or slurm job.
 
@@ -143,10 +148,10 @@ def get_job_file(o_pbs, i_job, gpu, slurm):
             ':', '-'
         )
         # add .pbs or _slurm.sh depending on whether it is to run on GPU.
-        if gpu or slurm:
-            job_file = '%s/%s_%s.slm' % (abspath('.'), i_job, cur_time)
-        else:
+        if torque:
             job_file = '%s/%s_%s.pbs' % (abspath('.'), i_job, cur_time)
+        else:
+            job_file = '%s/%s_%s.slm' % (abspath('.'), i_job, cur_time)
     # if the output filename was provided, just keep it
     else:
         job_file = o_pbs
@@ -167,41 +172,106 @@ def get_work_dir(p_dir: str):
     return work_dir
 
 
-def get_email_address(root: str, show_config: bool) -> str:
+def write_conf(conf: str) -> str:
+    """Collect the email address of the user
+    and write it somewhere it can be reused.
+
+    Parameters
+    ----------
+    conf : str
+        Path to the config file
+
+    Returns
+    -------
+    email : str
+        email address of the user.
+    """
+    email = ''
+    c = 0
+    while '@' not in email and '.' not in email:
+        if c:
+            email = input('Please enter a valid email address: ')
+        else:
+            email = input(
+                '%s\nThis is probably the first time you run Xpbs.\n'
+                'Hence a config file with you email will be created\n'
+                '(so you get emailed when a job fails)\n%s\n'
+                'Please enter an email address: ' % ('-' * 50, '-' * 50))
+        c += 1
+    o = open(conf, 'w')
+    o.write('%s\n' % email)
+    o.close()
+    print('Written:', conf)
+    print('If you want to change the email address, edit this file.')
+    return email
+
+
+def validate_email(conf: str, show_config: bool):
+    """
+    Checks that the content of the existing config file
+    is a valid email address.
+
+    Parameters
+    ----------
+    conf : str
+        Path to the config file
+    show_config : bool
+        Whether to show the first line of the config file or not.
+
+    Returns
+    -------
+    email : str
+        email address of the user.
+    """
+    # parse the first line of the config file
+    with open(conf) as f:
+        for line in f:
+            email = line.strip()
+            break
+    if show_config:
+        print(line)
+        sys.exit(0)
+    # stop if issue encountered (e.g. not edited, not correctly edited)
+    if '@' not in email:
+        raise IOError("Problem with %s:\n- needs an email address\n" % conf)
+    elif len(email.split('@')) != 2 or '.' not in email.split('@')[-1]:
+        raise IOError("Problem with %s:\n- no valid email address\n" % conf)
+    return email
+
+
+def get_email_address(show_config: bool) -> str:
     """
     Collect the email address from the edited config file.
 
-    :param root: main directory of the package.
-    :return: email address of the user.
-    """
+    Parameters
+    ----------
+    show_config : bool
+        Whether to show the first line of the config file or not.
 
+    Returns
+    -------
+    email : str
+        email address of the user.
+    """
     # get the config file shipped with the package and hopefully edited by user
-    config = '%s/config.txt' % root
+    conf = '%s/config.txt' % ROOT
     # check if exists or quit
-    if not isfile(config):
-        print('Problem with config file:\n- %s do not exists\n-> Exiting...' % config)
-        sys.exit(1)
+    if isfile(conf):
+        email = validate_email(conf, show_config)
     else:
-        # parse the first line of the config file
-        with open(config) as f:
-            for line in f:
-                ls = line.strip().split()
-                break
-        if show_config:
-            print(line)
-            sys.exit(0)
-        # stop is any issue encountered (not two fields, not edited, not correctly edited)
-        if len(ls) != 2:
-            print('Problem with config file:\n- %s does not contain two columns\n-> Exiting...' % config)
-            sys.exit(1)
-        if ls[0] == '$HOME' and ls[1] == 'your-email-address@whatever.yeah':
-            print("Problem with config file:\n- %s need editing (see README's Requisites)\n-> Exiting..." % config)
-            sys.exit(1)
-        # only get the actual $HOME value for the current user
-        if ls[0] != expanduser('~'):
-            print("Problem with config file: %s\n- The first field must be the value of $HOME"
-                  "(see README's Requisites)\n-> Exiting..." % config)
-            sys.exit(1)
-        # return the passed email address and not just the dummy default
-        email_address = ls[1]
-        return email_address
+        email = write_conf(conf)
+    return email
+
+
+def get_nodes_names() -> dict:
+    """
+    Collect the names of the cpus for each partition.
+
+    Returns
+    -------
+    cpus_per_partition : dict
+        List of cpus per partition.
+    """
+    sinfo = subprocess.getoutput('sinfo')
+    print(sinfo)
+    print(sinfodsa)

@@ -47,7 +47,7 @@ def get_nodes_ppn(n_: tuple, p: int) -> str:
 
 def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
             p_procs: int, p_nodes_names: tuple, p_mem: tuple, gpu: bool,
-            slurm: bool, email: bool, email_address: str) -> list:
+            torque: bool, email: bool, email_address: str) -> list:
     """
     Collect the directives for the Torque or Slurm job.
 
@@ -69,49 +69,7 @@ def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
     pbs = ['#!/bin/bash']
 
     # if running on GPU : using Slurm
-    if gpu or slurm:
-        pbs.append('#SBATCH --export=ALL')
-        pbs.append('#SBATCH --job-name=%s' % i_job)
-        if p_queue:
-            print('Warning: no queue but a PARTITION '
-                  '(automatically set to "gpu")')
-        if gpu:
-            pbs.append('#SBATCH --partition=gpu')
-            pbs.append('#SBATCH --gres=gpu:1')
-        else:
-            pbs.append('#SBATCH --partition=long')
-        if email:
-            pbs.append('#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80')
-        else:
-            pbs.append('#SBATCH --mail-type=FAIL,TIME_LIMIT_80')
-        pbs.append('#SBATCH --mail-user="%s"' % email_address)
-        if o_pbs:
-            out_dir = dirname(abspath(o_pbs))
-        else:
-            out_dir = '${SLURM_SUBMIT_DIR}'
-        pbs.append('#SBATCH --output=%s/%s_%sj_slurm.o' % (out_dir, i_job, '%'))
-        pbs.append('#SBATCH --error=%s/%s_%sj_slurm.e' % (out_dir, i_job, '%'))
-        # Specify number of CPUs (max 2 nodes,
-        # 32 processors per node) and of memory
-        if gpu:
-            if p_nodes_names:
-                pbs.append('#SBATCH --nodelist=brncl-%s' % p_nodes_names[0])
-            else:
-                pbs.append('#SBATCH --nodelist=brncl-33')
-            pbs.append('#SBATCH --nodes=1')
-        else:
-            pbs.append('#SBATCH --nodes=%s' % p_nodes)
-            pbs.append('#SBATCH --ntasks-per-node=%s' % p_procs)
-
-        m_num = float(p_mem[0])
-        m_byt = p_mem[1]
-        if m_byt == 'gb':
-            m_num = int(m_num * 1000)
-        pbs.append('#SBATCH --mem=%s' % m_num)
-        pbs.append('#SBATCH --time=%s:00:00' % p_time)
-
-    # if running on CPU : using Torque.
-    else:
+    if torque:
         pbs.append('#PBS -V')
         pbs.append('#PBS -N %s' % i_job)
         if p_queue:
@@ -134,4 +92,50 @@ def get_pbs(i_job: str, o_pbs: str, p_time: str, p_queue: str, p_nodes: int,
         pbs.append('#PBS -l %s' % nodes_ppn)
         pbs.append('#PBS -l mem=%s' % (''.join(list(p_mem))))
         pbs.append('#PBS -l walltime=%s:00:00' % p_time)
+    else:
+        pbs.append('#SBATCH --export=ALL')
+        pbs.append('#SBATCH --job-name=%s' % i_job)
+
+        partition = '#SBATCH --partition=normal'
+        if gpu:
+            partition = '#SBATCH --partition=gpu'
+            partition += '\n#SBATCH --gres=gpu:1'
+        elif p_queue:
+            partition = '#SBATCH --partition=%s' % p_queue
+        pbs.append(partition)
+
+        if email:
+            pbs.append('#SBATCH --mail-type=END,FAIL,TIME_LIMIT_80')
+        else:
+            pbs.append('#SBATCH --mail-type=FAIL,TIME_LIMIT_80')
+        pbs.append('#SBATCH --mail-user="%s"' % email_address)
+
+        if o_pbs:
+            out_dir = dirname(abspath(o_pbs))
+        else:
+            out_dir = '${SLURM_SUBMIT_DIR}'
+
+        pbs.append('#SBATCH --output=%s/%s_%sj_slurm.o' % (out_dir, i_job, '%'))
+        pbs.append('#SBATCH --error=%s/%s_%sj_slurm.e' % (out_dir, i_job, '%'))
+        # Specify number of CPUs (max 2 nodes,
+        # 32 processors per node) and of memory
+        if gpu:
+            if p_nodes_names:
+                pbs.append('#SBATCH --nodelist=brncl-%s' % p_nodes_names[0])
+            else:
+                pbs.append('#SBATCH --nodelist=brncl-33')
+            pbs.append('#SBATCH --nodes=1')
+        else:
+            pbs.append('#SBATCH --nodes=%s' % p_nodes)
+            pbs.append('#SBATCH --ntasks-per-node=%s' % p_procs)
+
+        m_num = float(p_mem[0])
+        m_byt = p_mem[1]
+        if m_byt == 'gb':
+            m_num = int(m_num * 1000)
+        elif m_byt == 'kb':
+            m_num = int(m_num / 1000)
+        pbs.append('#SBATCH --mem=%s' % m_num)
+        pbs.append('#SBATCH --time=%s:00:00' % p_time)
+
     return pbs
