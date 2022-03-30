@@ -60,7 +60,7 @@ advised)
 on the given "/localscratch" folder, as in this case some existing path may be copied that should not be, as for example program executatble paths...) 
     * **attention**: if option `--run` is used, it is impossible to check
 (use with caution) 
-3. Run `qsub <path>.pbs` (for Torque), or `squeue <path>.sh` (for Slurm)
+3. Run `qsub <path>.pbs` (for Torque), or `sbatch <path>.sh` (for Slurm)
   
 ## Usage
 

@@ -1,22 +1,24 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2020, Franck Lejzerowicz.
+# Copyright (c) 2022, Franck Lejzerowicz.
 #
 # Distributed under the terms of the Modified BSD License.
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
+
 import sys
 import datetime
 import subprocess
 import pkg_resources
-from os.path import abspath, exists, isfile
+from datetime import datetime as dt
+from os.path import abspath, exists, expanduser, isfile
 from pathlib import Path
 
 ROOT = pkg_resources.resource_filename("Xpbs", "")
 
 
 def write_job(i_job: str, job_file: str, pbs: list, env: list,
-              p_scratch_path: str, gpu: bool, torque: bool, notmp: bool,
+              p_scratch_folder: str, gpu: bool, torque: bool, notmp: bool,
               commands: list, outputs: list, ff_paths: set, ff_dirs: set,
               rm: bool, chmod: str, loc: bool) -> None:
     """
@@ -27,7 +29,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
     :param job_file: output filename for the job.
     :param pbs: actual series of commands, incl. the HPC directives.
     :param env: command to setup the environment.
-    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
+    :param p_scratch_folder: Folder for moving files and computing in (default = do not move to scratch).
     :param gpu: whether to run on GPU or not (and hence use Slurm in our case)
     :param commands: commands list.
     :param outputs: output files to potentially chmod.
@@ -56,7 +58,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
 
         # if running on scratch, write commands
         # to make directory for moved files/folders
-        if p_scratch_path and loc:
+        if p_scratch_folder and loc:
             for ff in set(ff_dirs):
                 o.write('mkdir -p %s\n' % ff)
                 o.write('mkdir -p ${locdir}%s\n' % ff)
@@ -66,7 +68,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
         # write the actual commands script
         for command in commands:
             # if running on scratch, including the actual files/folders moves
-            if p_scratch_path and loc:
+            if p_scratch_folder and loc:
                 for ff in ff_dirs:
                     if ff in command:
                         if ff[0] == '/':
@@ -88,7 +90,7 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
         o.write('\n')
 
         # if running on scratch, write commands that move files back
-        if p_scratch_path and loc:
+        if p_scratch_folder and loc:
             copied_dirs = set([
                 x for x in sorted(ff_dirs)
                 for y in sorted(ff_dirs) if x not in y
@@ -96,14 +98,18 @@ def write_job(i_job: str, job_file: str, pbs: list, env: list,
             for ff in sorted(ff_dirs):
                 if ff not in copied_dirs:
                     if ff[0] == '/':
-                        o.write('if [ -d ${locdir}%s/ ]; then rsync -auq ${locdir}%s/ %s/; fi\n' % (ff, ff, ff))
+                        o.write('if [ -d ${locdir}%s/ ]; then rsync -auq ${'
+                                'locdir}%s/ %s/; fi\n' % (ff, ff, ff))
                     else:
-                        o.write('if [ -d ${locdir}/%s/ ]; then rsync -auq ${locdir}/%s/ %s/; fi\n' % (ff, ff, ff))
+                        o.write('if [ -d ${locdir}/%s/ ]; then rsync -auq ${'
+                                'locdir}/%s/ %s/; fi\n' % (ff, ff, ff))
             for ff in set(outputs):
                 if ff[0] == '/':
-                    o.write('if [ -f ${locdir}%s ]; then rsync -auq ${locdir}%s %s; fi\n' % (ff, ff, ff))
+                    o.write('if [ -f ${locdir}%s ]; then rsync -auq ${'
+                            'locdir}%s %s; fi\n' % (ff, ff, ff))
                 else:
-                    o.write('if [ -f ${locdir}/%s ]; then rsync -auq ${locdir}/%s %s; fi\n' % (ff, ff, ff))
+                    o.write('if [ -f ${locdir}/%s ]; then rsync -auq ${'
+                            'locdir}/%s %s; fi\n' % (ff, ff, ff))
             if torque:
                 o.write('cd $PBS_O_WORKDIR\n')
             else:
@@ -263,15 +269,33 @@ def get_email_address(show_config: bool) -> str:
     return email
 
 
-def get_nodes_names() -> dict:
+def get_nodes_info(torque: bool, sinfo: bool, allocate: bool) -> list:
     """
-    Collect the names of the cpus for each partition.
+    Collect the nodes info from the output of Xsinfo.
+
+    Parameters
+    ----------
+    torque : bool
+        Switch from Slurm to Torque
+    sinfo : bool
+        Print sinfo in stdout (it will also be written in `~/.xsinfo`)
+    allocate : bool
+        Use info from `~/.xsinfo` to allocate suitable nodes/memory
 
     Returns
     -------
-    cpus_per_partition : dict
-        List of cpus per partition.
+    nodes : list
+        Nodes info.
     """
-    sinfo = subprocess.getoutput('sinfo')
-    print(sinfo)
-    print(sinfodsa)
+    nodes = []
+    if torque:
+        print('No node collection mechanism yet for PBS/Torque!')
+    else:
+        if sinfo or allocate:
+            fp = '%s/.xsinfo/%s.tsv' % (expanduser('~'), str(dt.now().date()))
+            if not isfile(fp):
+                subprocess.call('Xsinfo')
+            with open(fp) as f:
+                for line in f:
+                    nodes.append(line.strip().split('\t'))
+    return nodes
