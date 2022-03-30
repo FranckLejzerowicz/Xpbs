@@ -107,8 +107,6 @@ def run_xpbs(
     # get address from config file (which must exist)
     email_address = get_email_address(show_config)
     nodes_info = get_nodes_info(torque, sinfo, allocate)
-    print(nodes_info)
-    print(nodes_infofds)
 
     # get the filename of the output torque (.pbs) or slurm job
     job_file = get_job_file(o_pbs, i_job, gpu, torque)
