@@ -1,6 +1,5 @@
-#!/Data/Programs/miniconda3/envs/hivcker/bin/python3.7
 # ----------------------------------------------------------------------------
-# Copyright (c) 2020, Franck Lejzerowicz.
+# Copyright (c) 2022, Franck Lejzerowicz.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -25,8 +24,8 @@ classifiers = [s.strip() for s in classes.split('\n') if s]
 
 description = (
     "Xpbs is a command line tool allowing the conversion of a .sh script "
-    "into a Torque's .pbs script for use on a computer cluster with intel"
-    "nodes."
+    "into a Slurm or Torque script with directives for use on a computer"
+    "cluster."
 )
 
 with open("README.md") as f:
@@ -54,7 +53,8 @@ setup(
     url="https://github.com/FranckLejzerowicz/Xpbs",
     packages=find_packages(),
     install_requires=[
-        "click"
+        "click",
+        "Xsinfo"
     ],
     classifiers=classifiers,
     entry_points={'console_scripts': standalone},
