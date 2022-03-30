@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2020, Franck Lejzerowicz.
+# Copyright (c) 2022, Franck Lejzerowicz.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -57,7 +57,7 @@ from Xpbs import __version__
 	help="Walltime limit (1 integers: hours)"
 )
 @click.option(
-	"-l", "--p-scratch-path", show_default=True,
+	"-l", "--p-scratch-folder", show_default=True,
 	default='/cluster/work/users/${USER}',
 	help="scratch folder for moving files and computing"
 )
@@ -67,13 +67,12 @@ from Xpbs import __version__
 		 " integer and (2) one of 'mb', 'gb'. (Default: '500 mb')"
 )
 @click.option(
-	"-N", "--p-nodes-names", default=None,
-	multiple=True, type=click.Choice(map(str, range(74))),
-	help="Node names by the number(s), e.g. for c-04, enter '4'"
+	"-N", "--p-nodes-names", default=None, multiple=True,
+	help="Node names, e.g. `-N c1-4 -N c6-10 -N c7-1` (overrides option `-n`)"
 )
 @click.option(
 	"-c", "--p-chmod", default=None, show_default=True,
-	help="Change permission on all the output files (enter a 3 digit code)."
+	help="Change permission on all the output files (enter a 3 digit code)"
 )
 @click.option(
 	"-w", "--p-pwd", default=None, show_default=True,
@@ -101,7 +100,7 @@ from Xpbs import __version__
 )
 @click.option(
 	"--rm/--no-rm", default=True, show_default=True,
-	help="Remove the job's scratch files."
+	help="Remove the job's scratch files"
 )
 @click.option(
 	"--loc/--no-loc", default=True, show_default=True,
@@ -110,6 +109,14 @@ from Xpbs import __version__
 @click.option(
 	"--show-config/--no-show-config", default=False, show_default=True,
 	help="Show the current config file content"
+)
+@click.option(
+	"--sinfo/--no-sinfo", default=False, show_default=True,
+	help="Print sinfo in stdout (it will also be written in `~/.xsinfo`)"
+)
+@click.option(
+	"--allocate/--no-allocate", default=False, show_default=True,
+	help="Use info from `~/.xsinfo` to allocate suitable nodes/memory"
 )
 @click.version_option(__version__, prog_name="Xpbs")
 
@@ -126,7 +133,7 @@ def standalone_xpbs(
 		notmp,
 		p_procs,
 		p_time,
-		p_scratch_path,
+		p_scratch_folder,
 		p_mem,
 		p_nodes_names,
 		email,
@@ -138,7 +145,9 @@ def standalone_xpbs(
 		loc,
 		p_chmod,
 		p_pwd,
-		show_config
+		show_config,
+		sinfo,
+		allocate
 ):
 
 	run_xpbs(
@@ -153,7 +162,7 @@ def standalone_xpbs(
 		notmp,
 		p_procs,
 		p_time,
-		p_scratch_path,
+		p_scratch_folder,
 		p_mem,
 		p_nodes_names,
 		email,
@@ -165,7 +174,9 @@ def standalone_xpbs(
 		loc,
 		p_chmod,
 		p_pwd,
-		show_config
+		show_config,
+		sinfo,
+		allocate
 	)
 
 

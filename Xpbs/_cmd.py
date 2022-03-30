@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2020, Franck Lejzerowicz.
+# Copyright (c) 2022, Franck Lejzerowicz.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -122,13 +122,13 @@ def collect_abs_paths(line_input: str, p_env: str, conda_exe: set,
     return abs_line
 
 
-def get_commands_file(p_scratch_path: str, path: str, commands: list,
+def get_commands_file(p_scratch_folder: str, path: str, commands: list,
                       outputs: list, ff_paths: set, ff_dirs: set, p_env: str,
                       conda_exe: set, loc: bool) -> (list, list, set, set):
     """
     Parse the .sh file and collect the actual script commands.
 
-    :param p_scratch_path: Folder for moving files and computing in
+    :param p_scratch_folder: Folder for moving files and computing in
         (default = do not move to scratch).
     :param path: script file.
     :param commands: full list of commands to be appended.
@@ -152,11 +152,11 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list,
             # add this command with modified path to abspath as a new command
             commands.append(abs_line)
             # if it is asked to work on a scratch folder
-            if p_scratch_path and loc:
-                if p_scratch_path[0] != '/':
+            if p_scratch_folder and loc:
+                if p_scratch_folder[0] != '/':
                     print('scratch folder path must by absolute, i.e. start '
                           'with "/" .. Do you mean "/%s" ?\nExiting...' %
-                          p_scratch_path)
+                          p_scratch_folder)
                     sys.exit(1)
                 # get the path to be moved to this scratch
                 ff_paths, ff_dirs = collect_ff(
@@ -165,7 +165,7 @@ def get_commands_file(p_scratch_path: str, path: str, commands: list,
     return commands, outputs, ff_paths, ff_dirs
 
 
-def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: set,
+def get_commands_args(p_scratch_folder: str, i_script: list, ff_paths: set,
                       ff_dirs: set) -> (list, dict, dict):
     """
     ########################
@@ -174,7 +174,7 @@ def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: set,
     Parse the argument directly passed in the command line to Xpby
     and make a pbs script transformation for them.
 
-    :param p_scratch_path: Folder for moving files and computing in
+    :param p_scratch_folder: Folder for moving files and computing in
         (default = do not move to scratch).
     :param i_script: direct command line.
     :param ff_paths: files to move on scratch.
@@ -198,20 +198,20 @@ def get_commands_args(p_scratch_path: str, i_script: list, ff_paths: set,
     abs_line = ' '.join(abs_line)
 
     commands = [abs_line]
-    if p_scratch_path:
+    if p_scratch_folder:
         ff_paths, ff_dirs = collect_ff(
             abs_line, ff_paths, ff_dirs
         )
     return commands, ff_paths, ff_dirs
 
 
-def parse_command(i_script: str, p_scratch_path: str, p_env: str,
+def parse_command(i_script: str, p_scratch_folder: str, p_env: str,
                   conda_exe: set, loc: bool) -> (list, list, set, set):
     """
     Main interpreter of the passed scripts / command to the -i option.
 
     :param i_script: script file.
-    :param p_scratch_path: Folder for moving files and computing in
+    :param p_scratch_folder: Folder for moving files and computing in
         (default = do not move to scratch).
     :param p_env: Conda environment to run the job.
     :return:
@@ -228,7 +228,7 @@ def parse_command(i_script: str, p_scratch_path: str, p_env: str,
     if isfile(i_script):
         # get the command from the file content
         commands, outputs, ff_paths, ff_dirs = get_commands_file(
-            p_scratch_path, i_script, commands, outputs, ff_paths, ff_dirs,
+            p_scratch_folder, i_script, commands, outputs, ff_paths, ff_dirs,
             p_env, conda_exe, loc
         )
     # if the script file does not exists

@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2020, Franck Lejzerowicz.
+# Copyright (c) 2022, Franck Lejzerowicz.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -10,7 +10,7 @@ from os.path import abspath, dirname
 
 
 def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
-            work_dir: str, gpu: bool, torque: bool, p_scratch_path: str,
+            work_dir: str, gpu: bool, torque: bool, p_scratch_folder: str,
             ff_paths: set, ff_dirs: set, loc: bool, p_pwd: str) -> list:
     """
     Get the lines to be written as header to the job
@@ -24,7 +24,7 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
     :param p_tmp: Alternative temp folder to the one defined in $TMPDIR.
     :param work_dir: Output directory.
     :param gpu: whether to run on GPU or not (and hence use Slurm in our case).
-    :param p_scratch_path: Folder for moving files and computing in (default = do not move to scratch).
+    :param p_scratch_folder: Folder for moving files and computing in (default = do not move to scratch).
     :param ff_paths: files to be moved for /localscratch jobs.
     :param ff_dirs: folders to be moved for /localscratch jobs.
     :return: the commands for the compute environment.
@@ -97,12 +97,12 @@ def get_env(i_job: str, o_pbs: str, p_env: str, p_tmp: str, notmp: bool,
     env.append('echo "${jobstderr}"')
 
     # if running on scratch
-    if p_scratch_path and loc:
+    if p_scratch_folder and loc:
         # get the output directory for the job
         # if exists(work_dir) and work_dir != '.':
-        #     locdir = '%s/%s_${%s}/%s' % (p_scratch_path, i_job, job_id, work_dir.strip('/'))
+        #     locdir = '%s/%s_${%s}/%s' % (p_scratch_folder, i_job, job_id, work_dir.strip('/'))
         # else:
-        locdir = '%s/%s_${%s}' % (p_scratch_path, i_job, job_id)
+        locdir = '%s/%s_${%s}' % (p_scratch_folder, i_job, job_id)
         env.append('locdir=%s' % locdir)
         # create fresh folder
         env.append('rm -rf ${locdir}')
